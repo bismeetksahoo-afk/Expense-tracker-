@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<!-- PWA: Makes it open full screen with no browser UI when added to Home Screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="XpenseTrack">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1A1A2E">
+
+<!-- App icon shown on Home Screen (generates from inline SVG via JS below) -->
+<link rel="apple-touch-icon" id="appIcon">
+
+<title>XpenseTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1A1A2E;--cream:#F8F4EF;--burnt:#C8762B;--gold:#E8D5B7;--muted:#8A7E72;--card:#fff;--border:#E5DDD4;--red:#E53935;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{height:100%;height:-webkit-fill-available;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;min-height:-webkit-fill-available;overflow-x:hidden;}
+header{background:var(--ink);padding:14px 16px;padding-top:max(14px, env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--gold);}
+.logo em{color:#E8954A;font-style:italic;}
+.dtag{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.page{display:none;padding:14px 14px 0;padding-bottom:calc(80px + env(safe-area-inset-bottom, 20px));}
+.page.active{display:block;}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;border-left:3px solid var(--burnt);}
+.slabel{font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;}
+.sval{font-family:'DM Serif Display',serif;font-size:22px;color:var(--ink);line-height:1;}
+.ssub{font-size:10px;color:var(--muted);margin-top:3px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.ch{background:var(--ink);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
+.ct{font-family:'DM Serif Display',serif;font-size:15px;color:var(--gold);}
+.cb{padding:14px;}
+.smsbox{background:var(--ink);border-radius:12px;padding:12px;margin-bottom:14px;}
+.smslbl{font-size:9px;font-weight:700;color:#E8954A;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+#smsText{width:100%;background:#2A2A4A;border:none;border-radius:10px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);line-height:1.6;resize:none;height:80px;outline:none;display:block;}
+#smsText::placeholder{color:#5A5A7A;}
+.pbtn{width:100%;margin-top:8px;background:var(--burnt);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;display:block;-webkit-appearance:none;touch-action:manipulation;}
+.pbtn:active{opacity:.8;}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;}
+input,select{border:1.5px solid var(--border);border-radius:8px;padding:12px;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--ink);background:var(--cream);outline:none;width:100%;-webkit-appearance:none;appearance:none;}
+input:focus,select:focus{border-color:var(--burnt);}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A7E72' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-color:var(--cream);padding-right:36px;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.savebtn{background:var(--burnt);color:#fff;border:none;border-radius:10px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;width:100%;-webkit-appearance:none;touch-action:manipulation;display:block;margin-top:4px;}
+.savebtn:active{opacity:.8;}
+.ei{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);}
+.ei:last-child{border-bottom:none;}
+.ecat{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.edesc{flex:1;min-width:0;}
+.et{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.em{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
+.eamt{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--red);flex-shrink:0;}
+.cr{margin-bottom:12px;}
+.crl{display:flex;justify-content:space-between;margin-bottom:4px;}
+.crl span:first-child{font-size:12px;font-weight:500;}
+.crl span:last-child{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);}
+.bt{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+.bf{height:100%;border-radius:99px;background:var(--burnt);}
+.dbars{display:flex;align-items:flex-end;gap:5px;height:90px;padding-top:8px;}
+.dbw{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.db{width:100%;border-radius:4px 4px 0 0;background:var(--burnt);min-height:4px;}
+.dlbl{font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);}
+.toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom, 20px));left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--gold);border:1px solid var(--burnt);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .25s ease;z-index:999;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--ink);display:flex;flex-direction:row;border-top:1px solid rgba(255,255,255,.1);z-index:100;padding-bottom:env(safe-area-inset-bottom, 16px);}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;border:none;background:transparent;color:var(--muted);font-size:10px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;gap:4px;touch-action:manipulation;min-height:56px;-webkit-appearance:none;-webkit-user-select:none;user-select:none;}
+.nb .ni{font-size:24px;line-height:1;display:block;}
+.nb.active{color:#E8954A;}
+.nb.active .ni{transform:scale(1.15);}
+.step{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.step:last-child{border-bottom:none;}
+.snum{width:28px;height:28px;background:var(--burnt);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.stxt .st{font-size:13px;font-weight:600;margin-bottom:3px;}
+.stxt .ss{font-size:11px;color:var(--muted);line-height:1.6;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Xpense<em>Track</em></div>
+  <div class="dtag" id="dtag">-</div>
+</header>
+
+<!-- Dashboard -->
+<div class="page active" id="p-dash">
+  <div class="sgrid" id="sgrid"></div>
+  <div class="card">
+    <div class="ch"><div class="ct">Daily Spend</div><div style="font-size:10px;color:var(--muted)">Last 8 days</div></div>
+    <div class="cb"><div class="dbars" id="dbars"></div></div>
+  </div>
+  <div class="card">
+    <div class="ch"><div class="ct">By Category</div></div>
+    <div class="cb" id="cchart"></div>
+  </div>
+</div>
+
+<!-- Add -->
+<div class="page" id="p-add">
+  <div class="smsbox">
+    <div class="smslbl">Paste Bank SMS to Auto-fill</div>
+    <textarea id="smsText" placeholder="Paste your bank SMS here e.g. Rs.280.00 debited from HDFC on 08-Mar-26. Info: UPI/Zomato"></textarea>
+    <button class="pbtn" id="pbtn">Auto-fill from SMS</button>
+  </div>
+  <div class="fg"><label>Amount (Rs) *</label><input type="number" id="fAmt" placeholder="0" inputmode="decimal" step="0.01"></div>
+  <div class="fg"><label>Description</label><input type="text" id="fDesc" placeholder="What did you spend on?"></div>
+  <div class="frow">
+    <div class="fg">
+      <label>Category</label>
+      <select id="fCat">
+        <option value="Food">Food and Dining</option>
+        <option value="Transport">Transport</option>
+        <option value="Shopping">Shopping</option>
+        <option value="Grocery">Grocery</option>
+        <option value="Entertainment">Entertainment</option>
+        <option value="Healthcare">Healthcare</option>
+        <option value="Utilities">Utilities</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Payment</label>
+      <select id="fMode">
+        <option>UPI</option>
+        <option>Credit Card</option>
+        <option>Debit Card</option>
+        <option>Cash</option>
+        <option>Net Banking</option>
+      </select>
+    </div>
+  </div>
+  <div class="fg"><label>Date</label><input type="date" id="fDate"></div>
+  <button class="savebtn" id="savebtn">Save Expense</button>
+</div>
+
+<!-- History -->
+<div class="page" id="p-hist">
+  <div class="card">
+    <div class="ch"><div class="ct">All Transactions</div><div style="font-size:10px;color:var(--muted)" id="txcount">-</div></div>
+    <div class="cb" id="txlist"></div>
+  </div>
+</div>
+
+<!-- Setup -->
+<div class="page" id="p-setup">
+  <div class="card" style="margin-bottom:14px;">
+    <div class="ch"><div class="ct">How to Use on Mobile</div></div>
+    <div class="cb">
+      <div class="step"><div class="snum">1</div><div class="stxt"><div class="st">Save to Home Screen</div><div class="ss">iOS: Share - Add to Home Screen<br>Android: Menu - Add to Home Screen</div></div></div>
+      <div class="step"><div class="snum">2</div><div class="stxt"><div class="st">Copy your bank SMS</div><div class="ss">Long-press the SMS alert and tap Copy</div></div></div>
+      <div class="step"><div class="snum">3</div><div class="stxt"><div class="st">Open app, tap Add tab</div><div class="ss">Long-press the dark box, tap Paste, then tap Auto-fill</div></div></div>
+      <div class="step"><div class="snum">4</div><div class="stxt"><div class="st">Verify and Save</div><div class="ss">Check the parsed fields and tap Save Expense</div></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><div class="ct">Supported SMS Formats</div></div>
+    <div class="cb" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:2.2;">
+      HDFC: Rs.280 debited... Info: UPI/Zomato<br>
+      SBI: INR 1200 debited from SBI A/c<br>
+      ICICI: Rs 450 spent at Apollo Pharmacy<br>
+      Axis: Rs.65.00 debited at Ola<br>
+      Kotak: Rs 399 paid to Amazon<br>
+      Any SMS with Rs / INR + amount
+    </div>
+  </div>
+</div>
+
+<div class="bnav">
+  <button class="nb active" id="nb-dash"><span class="ni">&#x1F4CA;</span>Dashboard</button>
+  <button class="nb" id="nb-add"><span class="ni">&#x2795;</span>Add</button>
+  <button class="nb" id="nb-hist"><span class="ni">&#x1F4CB;</span>History</button>
+  <button class="nb" id="nb-setup"><span class="ni">&#x2699;&#xFE0F;</span>Setup</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var CATS = {
+  "Food":          {label:"Food and Dining", emoji:"🍽️", color:"#FFF3E0"},
+  "Transport":     {label:"Transport",       emoji:"🚗",  color:"#E8F5E9"},
+  "Shopping":      {label:"Shopping",        emoji:"🛍️", color:"#FCE4EC"},
+  "Grocery":       {label:"Grocery",         emoji:"🛒",  color:"#E0F7FA"},
+  "Entertainment": {label:"Entertainment",   emoji:"🎬",  color:"#EDE7F6"},
+  "Healthcare":    {label:"Healthcare",      emoji:"💊",  color:"#E3F2FD"},
+  "Utilities":     {label:"Utilities",       emoji:"💡",  color:"#F3E5F5"},
+  "Other":         {label:"Other",           emoji:"📦",  color:"#F5F5F5"}
+};
+
+var data = JSON.parse(localStorage.getItem("xpense_data") || "[]");
+
+function saveData() {
+  localStorage.setItem("xpense_data", JSON.stringify(data));
+}
+
+function fmt(n) {
+  return "Rs." + Number(n).toLocaleString("en-IN", {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+function switchPage(name) {
+  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
+  document.querySelectorAll(".nb").forEach(function(b){ b.classList.remove("active"); });
+  document.getElementById("p-" + name).classList.add("active");
+  document.getElementById("nb-" + name).classList.add("active");
+  if (name === "hist") renderHist();
+}
+
+document.getElementById("nb-dash").addEventListener("click",  function(){ switchPage("dash"); });
+document.getElementById("nb-add").addEventListener("click",   function(){ switchPage("add"); });
+document.getElementById("nb-hist").addEventListener("click",  function(){ switchPage("hist"); });
+document.getElementById("nb-setup").addEventListener("click", function(){ switchPage("setup"); });
+document.getElementById("pbtn").addEventListener("click", parseSMS);
+document.getElementById("savebtn").addEventListener("click", saveExpense);
+
+function init() {
+  var now = new Date();
+  document.getElementById("dtag").textContent = now.toLocaleDateString("en-IN", {day:"numeric", month:"short", year:"numeric"});
+  document.getElementById("fDate").value = now.toISOString().slice(0, 10);
+  render();
+}
+
+function render() { renderStats(); renderDayBars(); renderCatChart(); }
+
+function renderStats() {
+  var today = new Date().toISOString().slice(0, 10);
+  var texp = data.filter(function(e){ return e.date === today; });
+  var total = 0; data.forEach(function(e){ total += e.amt; });
+  var tday  = 0; texp.forEach(function(e){ tday  += e.amt; });
+  var mkey  = today.slice(0, 7);
+  var mamt  = 0; data.filter(function(e){ return e.date.slice(0,7) === mkey; }).forEach(function(e){ mamt += e.amt; });
+  var udays = {}; data.forEach(function(e){ udays[e.date] = 1; });
+  var nd    = Object.keys(udays).length || 1;
+  document.getElementById("sgrid").innerHTML =
+    '<div class="sc"><div class="slabel">Today</div><div class="sval">'        + fmt(tday)       + '</div><div class="ssub">' + texp.length + ' txns</div></div>' +
+    '<div class="sc"><div class="slabel">This Month</div><div class="sval">'   + fmt(mamt)       + '</div><div class="ssub">Mar 2026</div></div>' +
+    '<div class="sc"><div class="slabel">Daily Avg</div><div class="sval">'    + fmt(total / nd) + '</div><div class="ssub">per day</div></div>' +
+    '<div class="sc"><div class="slabel">All Time</div><div class="sval">'     + fmt(total)      + '</div><div class="ssub">' + data.length + ' entries</div></div>';
+}
+
+function renderDayBars() {
+  var daily = {};
+  data.forEach(function(e){ daily[e.date] = (daily[e.date] || 0) + e.amt; });
+  var dates = Object.keys(daily).sort().slice(-8);
+  var mx = 0; dates.forEach(function(d){ if (daily[d] > mx) mx = daily[d]; }); if (!mx) mx = 1;
+  var h = "";
+  dates.forEach(function(d) {
+    var pct = Math.max(Math.round(daily[d] / mx * 100), 4);
+    h += '<div class="dbw"><div class="db" style="height:' + pct + '%"></div><div class="dlbl">' + d.slice(8) + '</div></div>';
+  });
+  document.getElementById("dbars").innerHTML = h;
+}
+
+function renderCatChart() {
+  var tots = {};
+  data.forEach(function(e){ tots[e.cat] = (tots[e.cat] || 0) + e.amt; });
+  var mx = 0; Object.keys(tots).forEach(function(k){ if (tots[k] > mx) mx = tots[k]; }); if (!mx) mx = 1;
+  var entries = Object.keys(tots).map(function(k){ return [k, tots[k]]; }).sort(function(a,b){ return b[1] - a[1]; });
+  var h = "";
+  entries.forEach(function(pair) {
+    var c = CATS[pair[0]] || CATS["Other"];
+    var pct = Math.round(pair[1] / mx * 100);
+    h += '<div class="cr"><div class="crl"><span>' + c.label + '</span><span>' + fmt(pair[1]) + '</span></div>' +
+         '<div class="bt"><div class="bf" style="width:' + pct + '%"></div></div></div>';
+  });
+  document.getElementById("cchart").innerHTML = h;
+}
+
+function renderHist() {
+  var sorted = data.slice().sort(function(a,b){ return (b.date + b.time).localeCompare(a.date + a.time); });
+  document.getElementById("txcount").textContent = sorted.length + " entries";
+  var h = "";
+  sorted.forEach(function(e) {
+    var c = CATS[e.cat] || CATS["Other"];
+    h += '<div class="ei">' +
+         '<div class="ecat" style="background:' + c.color + '">' + c.emoji + '</div>' +
+         '<div class="edesc"><div class="et">' + e.desc + '</div><div class="em">' + e.date + " " + e.mode + '</div></div>' +
+         '<div class="eamt">-' + fmt(e.amt) + '</div></div>';
+  });
+  document.getElementById("txlist").innerHTML = h;
+}
+
+function saveExpense() {
+  var amt = parseFloat(document.getElementById("fAmt").value);
+  if (!amt || amt <= 0) { showToast("Enter a valid amount"); return; }
+  var desc = document.getElementById("fDesc").value.trim();
+  var now = new Date();
+  data.unshift({
+    id:   Date.now(),
+    date: document.getElementById("fDate").value,
+    time: now.toTimeString().slice(0, 5),
+    cat:  document.getElementById("fCat").value,
+    desc: desc,
+    amt:  amt,
+    mode: document.getElementById("fMode").value
+  });
+  saveData();
+  render();
+  showToast("Expense saved!");
+  document.getElementById("fAmt").value  = "";
+  document.getElementById("fDesc").value = "";
+  document.getElementById("smsText").value = "";
+}
+
+function parseSMS() {
+  var text = document.getElementById("smsText").value.trim();
+  if (!text) { showToast("Paste an SMS first"); return; }
+
+  // --- Extract amount ---
+  var amt = null;
+  var amtTests = [
+    function(t){ var m = t.match(/(?:Rs\.?|INR)\s*([\d,]+(?:\.\d{1,2})?)/i);  return m ? m[1] : null; },
+    function(t){ var m = t.match(/(?:debited|credited|paid|spent)\s+(?:Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)/i); return m ? m[1] : null; },
+    function(t){ var m = t.match(/([\d,]+\.\d{2})\s*(?:has been\s+)?(?:debited|credited)/i); return m ? m[1] : null; },
+    function(t){ var m = t.match(/amount\s*:?\s*(?:Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)/i); return m ? m[1] : null; }
+  ];
+  for (var i = 0; i < amtTests.length; i++) {
+    var res = amtTests[i](text);
+    if (res) { amt = parseFloat(res.replace(/,/g, "")); break; }
+  }
+
+  // --- Extract description ---
+  var desc = "";
+  var descTests = [
+    function(t){ var m = t.match(/Info:\s*(?:UPI[-\/\s])?([A-Za-z0-9 &.\-]{2,30})(?:\/|\s|$)/i); return m ? m[1] : null; },
+    function(t){ var m = t.match(/(?:at|to)\s+([A-Za-z][A-Za-z0-9 &\-]{2,25})(?:\s+on|\s*[,.]|\s*Ref|$)/i); return m ? m[1] : null; },
+    function(t){ var m = t.match(/(?:paid to|trf to)\s+([A-Za-z][A-Za-z0-9 &\-]{2,25})/i); return m ? m[1] : null; },
+    function(t){ var m = t.match(/VPA\s+([a-z0-9.\-@]+)/i); return m ? m[1] : null; },
+    function(t){ var m = t.match(/Merchant:\s*([A-Za-z0-9 &\-]{2,30})/i); return m ? m[1] : null; }
+  ];
+  for (var j = 0; j < descTests.length; j++) {
+    var r = descTests[j](text);
+    if (r) { desc = r.replace(/[_@]/g, " ").trim(); break; }
+  }
+
+  // --- Guess category ---
+  var catGuess = "Other";
+  var cmap = {
+    "Food":          ["swiggy","zomato","dominos","mcdonald","kfc","restaurant","cafe","canteen","food","pizza","burger","chai","dhaba","biryani","starbucks","dunkin","haldiram"],
+    "Transport":     ["uber","ola","rapido","metro","petrol","diesel","fuel","auto","toll","redbus","flight","indigo","irctc"],
+    "Shopping":      ["amazon","flipkart","myntra","ajio","meesho","nykaa","croma","decathlon"],
+    "Grocery":       ["dmart","bigbasket","blinkit","zepto","grofers","reliance fresh","grocery","vegetables","kirana"],
+    "Entertainment": ["netflix","hotstar","disney","zee5","pvr","inox","bookmyshow","spotify","gaana"],
+    "Healthcare":    ["pharmacy","medplus","apollo","1mg","netmeds","pharmeasy","medicine","hospital","doctor"],
+    "Utilities":     ["electricity","bses","tata power","adani","recharge","airtel","jio","vodafone","bsnl","broadband","igl","gas","water"]
+  };
+  var hay = (text + " " + desc).toLowerCase();
+  var ck = Object.keys(cmap);
+  outer: for (var k = 0; k < ck.length; k++) {
+    var kws = cmap[ck[k]];
+    for (var l = 0; l < kws.length; l++) {
+      if (hay.indexOf(kws[l]) !== -1) { catGuess = ck[k]; break outer; }
+    }
+  }
+
+  // --- Parse date ---
+  var pdate = new Date().toISOString().slice(0, 10);
+  var mn = {jan:"01",feb:"02",mar:"03",apr:"04",may:"05",jun:"06",jul:"07",aug:"08",sep:"09",oct:"10",nov:"11",dec:"12"};
+  var dm = text.match(/(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{2,4})/);
+  if (dm) {
+    var yy = dm[3].length === 2 ? "20" + dm[3] : dm[3];
+    pdate = yy + "-" + (mn[dm[2].toLowerCase()] || "01") + "-" + dm[1].padStart(2, "0");
+  } else {
+    var dm2 = text.match(/(\d{2})[-\/](\d{2})[-\/](\d{4})/);
+    if (dm2) pdate = dm2[3] + "-" + dm2[2] + "-" + dm2[1];
+  }
+
+  // --- Fill fields ---
+  if (amt)  document.getElementById("fAmt").value  = amt;
+  if (desc) document.getElementById("fDesc").value = desc;
+  document.getElementById("fCat").value  = catGuess;
+  document.getElementById("fDate").value = pdate;
+
+  showToast(amt ? ("Parsed Rs." + amt + (desc ? " - " + desc.slice(0, 18) : "")) : "Amount not found - fill manually");
+}
+
+var toastTimer;
+function showToast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2500);
+}
+
+init();
+
+// ── GENERATE HOME SCREEN ICON ────────────────────────────────
+// Creates a canvas-based icon so the app looks good on Home Screen
+(function() {
+  try {
+    var c = document.createElement("canvas");
+    c.width = 180; c.height = 180;
+    var ctx = c.getContext("2d");
+    // Background
+    var grad = ctx.createLinearGradient(0, 0, 180, 180);
+    grad.addColorStop(0, "#1A1A2E");
+    grad.addColorStop(1, "#2A2A4E");
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, 180, 180, 36);
+    ctx.fill();
+    // Rupee symbol
+    ctx.fillStyle = "#C8762B";
+    ctx.font = "bold 90px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("₹", 90, 95);
+    // Small dot accent
+    ctx.fillStyle = "#E8D5B7";
+    ctx.beginPath();
+    ctx.arc(130, 50, 10, 0, Math.PI * 2);
+    ctx.fill();
+    document.getElementById("appIcon").href = c.toDataURL("image/png");
+  } catch(e) {}
+})();
+
+// ── INSTALL BANNER (shows only in Safari, not already installed) ──
+(function() {
+  var isStandalone = window.navigator.standalone === true;
+  var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  var dismissed = localStorage.getItem("pwa_banner_dismissed");
+
+  if (!isStandalone && isIOS && isSafari && !dismissed) {
+    var banner = document.createElement("div");
+    banner.id = "installBanner";
+    banner.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;flex:1;">' +
+        '<span style="font-size:28px;">📲</span>' +
+        '<div>' +
+          '<div style="font-weight:700;font-size:13px;color:#E8D5B7;">Add to Home Screen</div>' +
+          '<div style="font-size:11px;color:#8A7E72;margin-top:2px;">Tap <strong style="color:#C8762B;">Share</strong> → <strong style="color:#C8762B;">Add to Home Screen</strong> for the full app experience</div>' +
+        '</div>' +
+      '</div>' +
+      '<button onclick="document.getElementById(\'installBanner\').remove();localStorage.setItem(\'pwa_banner_dismissed\',\'1\')" ' +
+        'style="background:none;border:none;color:#8A7E72;font-size:20px;cursor:pointer;padding:4px;flex-shrink:0;">✕</button>';
+    banner.style.cssText = "position:fixed;bottom:calc(70px + env(safe-area-inset-bottom,16px));left:12px;right:12px;" +
+      "background:#1A1A2E;border:1px solid #C8762B;border-radius:14px;padding:12px 14px;" +
+      "display:flex;align-items:center;gap:8px;z-index:998;box-shadow:0 4px 20px rgba(0,0,0,.4);";
+    document.body.appendChild(banner);
+  }
+})();
+</script>
+</body>
+</html>
