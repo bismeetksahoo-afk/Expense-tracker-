@@ -1,10 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
 <!-- PWA: Makes it open full screen with no browser UI when added to Home Screen -->
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="XpenseTrack">
@@ -12,6 +14,7 @@
 <meta name="theme-color" content="#1A1A2E">
 
 <!-- App icon shown on Home Screen (generates from inline SVG via JS below) -->
+
 <link rel="apple-touch-icon" id="appIcon">
 
 <title>XpenseTrack</title>
@@ -79,6 +82,14 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .snum{width:28px;height:28px;background:var(--burnt);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
 .stxt .st{font-size:13px;font-weight:600;margin-bottom:3px;}
 .stxt .ss{font-size:11px;color:var(--muted);line-height:1.6;}
+.dlbtn{width:100%;padding:13px;background:var(--ink);color:var(--gold);border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;touch-action:manipulation;}
+.dlbtn:active{opacity:.8;}
+.editbtn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;flex-shrink:0;touch-action:manipulation;}
+.editbtn:active{background:var(--border);}
+.fpills{display:flex;gap:5px;}
+.fp{background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:20px;color:var(--muted);font-size:10px;font-weight:700;padding:3px 9px;cursor:pointer;touch-action:manipulation;font-family:'DM Sans',sans-serif;-webkit-appearance:none;}
+.fp.active{background:var(--burnt);border-color:var(--burnt);color:#fff;}
+.fp:active{opacity:.7;}
 </style>
 </head>
 <body>
@@ -89,19 +100,35 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </header>
 
 <!-- Dashboard -->
+
 <div class="page active" id="p-dash">
   <div class="sgrid" id="sgrid"></div>
   <div class="card">
-    <div class="ch"><div class="ct">Daily Spend</div><div style="font-size:10px;color:var(--muted)">Last 8 days</div></div>
+    <div class="ch">
+      <div class="ct">Daily Spend</div>
+      <div class="fpills" id="barFilter">
+        <button class="fp active" data-days="8">8D</button>
+        <button class="fp" data-days="30">1M</button>
+        <button class="fp" data-days="90">3M</button>
+      </div>
+    </div>
     <div class="cb"><div class="dbars" id="dbars"></div></div>
   </div>
   <div class="card">
-    <div class="ch"><div class="ct">By Category</div></div>
+    <div class="ch">
+      <div class="ct">By Category</div>
+      <div class="fpills" id="catFilter">
+        <button class="fp active" data-days="8">8D</button>
+        <button class="fp" data-days="30">1M</button>
+        <button class="fp" data-days="90">3M</button>
+      </div>
+    </div>
     <div class="cb" id="cchart"></div>
   </div>
 </div>
 
 <!-- Add -->
+
 <div class="page" id="p-add">
   <div class="smsbox">
     <div class="smslbl">Paste Bank SMS to Auto-fill</div>
@@ -140,14 +167,58 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <!-- History -->
+
 <div class="page" id="p-hist">
+  <button class="dlbtn" id="dlbtn">&#x2B07; Download as Excel</button>
   <div class="card">
     <div class="ch"><div class="ct">All Transactions</div><div style="font-size:10px;color:var(--muted)" id="txcount">-</div></div>
     <div class="cb" id="txlist"></div>
   </div>
 </div>
 
+<!-- Edit Modal -->
+
+<div id="editOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-end;">
+  <div style="background:var(--cream);border-radius:20px 20px 0 0;padding:20px 16px 40px;width:100%;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <span style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink);">Edit Expense</span>
+      <button onclick="closeEdit()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+    <div class="fg"><label>Amount (Rs) *</label><input type="number" id="eAmt" inputmode="decimal" step="0.01"></div>
+    <div class="fg"><label>Description</label><input type="text" id="eDesc"></div>
+    <div class="frow">
+      <div class="fg">
+        <label>Category</label>
+        <select id="eCat">
+          <option value="Food">Food and Dining</option>
+          <option value="Transport">Transport</option>
+          <option value="Shopping">Shopping</option>
+          <option value="Grocery">Grocery</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Healthcare">Healthcare</option>
+          <option value="Utilities">Utilities</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Payment</label>
+        <select id="eMode">
+          <option>UPI</option>
+          <option>Credit Card</option>
+          <option>Debit Card</option>
+          <option>Cash</option>
+          <option>Net Banking</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label>Date</label><input type="date" id="eDate"></div>
+    <button class="savebtn" onclick="saveEdit()" style="margin-bottom:10px;">Save Changes</button>
+    <button onclick="deleteExpense()" style="width:100%;padding:13px;background:#fff;color:#E53935;border:1.5px solid #E53935;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">Delete Expense</button>
+  </div>
+</div>
+
 <!-- Setup -->
+
 <div class="page" id="p-setup">
   <div class="card" style="margin-bottom:14px;">
     <div class="ch"><div class="ct">How to Use on Mobile</div></div>
@@ -215,6 +286,32 @@ document.getElementById("nb-hist").addEventListener("click",  function(){ switch
 document.getElementById("nb-setup").addEventListener("click", function(){ switchPage("setup"); });
 document.getElementById("pbtn").addEventListener("click", parseSMS);
 document.getElementById("savebtn").addEventListener("click", saveExpense);
+document.getElementById("dlbtn").addEventListener("click", downloadExcel);
+
+// Filter pills — Daily Spend
+document.getElementById("barFilter").addEventListener("click", function(e){
+  var btn = e.target.closest(".fp");
+  if (!btn) return;
+  document.querySelectorAll("#barFilter .fp").forEach(function(b){ b.classList.remove("active"); });
+  btn.classList.add("active");
+  barDays = parseInt(btn.dataset.days);
+  renderDayBars();
+});
+
+// Filter pills — By Category
+document.getElementById("catFilter").addEventListener("click", function(e){
+  var btn = e.target.closest(".fp");
+  if (!btn) return;
+  document.querySelectorAll("#catFilter .fp").forEach(function(b){ b.classList.remove("active"); });
+  btn.classList.add("active");
+  catDays = parseInt(btn.dataset.days);
+  renderCatChart();
+});
+
+// Close edit modal when tapping the dark overlay background
+document.getElementById("editOverlay").addEventListener("click", function(e){
+  if (e.target === this) closeEdit();
+});
 
 function init() {
   var now = new Date();
@@ -241,29 +338,91 @@ function renderStats() {
     '<div class="sc"><div class="slabel">All Time</div><div class="sval">'     + fmt(total)      + '</div><div class="ssub">' + data.length + ' entries</div></div>';
 }
 
+var barDays = 8;
+var catDays = 8;
+
+function getFilteredData(days) {
+  var cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  var cutStr = cutoff.toISOString().slice(0, 10);
+  return data.filter(function(e){ return e.date >= cutStr; });
+}
+
 function renderDayBars() {
+  var filtered = getFilteredData(barDays);
   var daily = {};
-  data.forEach(function(e){ daily[e.date] = (daily[e.date] || 0) + e.amt; });
-  var dates = Object.keys(daily).sort().slice(-8);
+  filtered.forEach(function(e){ daily[e.date] = (daily[e.date] || 0) + e.amt; });
+
+  // For 8D show individual days, for 1M/3M group by week
+  var dates, labels;
+  if (barDays === 8) {
+    dates = Object.keys(daily).sort().slice(-8);
+    labels = dates.map(function(d){ return d.slice(8); }); // day number
+  } else if (barDays === 30) {
+    // Group into ~4 weeks
+    var weeks = {};
+    Object.keys(daily).sort().forEach(function(d){
+      var dt = new Date(d);
+      // Week number within the period
+      var wk = "W" + Math.ceil((new Date() - dt) / (7 * 864e5));
+      weeks[wk] = (weeks[wk] || 0) + daily[d];
+    });
+    // Reverse so oldest first
+    dates = Object.keys(weeks).sort().reverse();
+    labels = dates;
+    daily = weeks;
+  } else {
+    // 3M: group by month
+    var months = {};
+    Object.keys(daily).sort().forEach(function(d){
+      var m = d.slice(0, 7); // YYYY-MM
+      months[m] = (months[m] || 0) + daily[d];
+    });
+    dates = Object.keys(months).sort();
+    labels = dates.map(function(m){
+      var parts = m.split("-");
+      var mn = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      return mn[parseInt(parts[1]) - 1];
+    });
+    daily = months;
+  }
+
+  if (!dates.length) {
+    document.getElementById("dbars").innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;">No data for this period</div>';
+    return;
+  }
+
   var mx = 0; dates.forEach(function(d){ if (daily[d] > mx) mx = daily[d]; }); if (!mx) mx = 1;
   var h = "";
-  dates.forEach(function(d) {
-    var pct = Math.max(Math.round(daily[d] / mx * 100), 4);
-    h += '<div class="dbw"><div class="db" style="height:' + pct + '%"></div><div class="dlbl">' + d.slice(8) + '</div></div>';
+  dates.forEach(function(d, i) {
+    var pct = Math.max(Math.round((daily[d] || 0) / mx * 100), 4);
+    h += '<div class="dbw"><div class="db" style="height:' + pct + '%"></div><div class="dlbl">' + labels[i] + '</div></div>';
   });
   document.getElementById("dbars").innerHTML = h;
 }
 
 function renderCatChart() {
+  var filtered = getFilteredData(catDays);
   var tots = {};
-  data.forEach(function(e){ tots[e.cat] = (tots[e.cat] || 0) + e.amt; });
+  filtered.forEach(function(e){ tots[e.cat] = (tots[e.cat] || 0) + e.amt; });
+  var total = 0; Object.keys(tots).forEach(function(k){ total += tots[k]; });
   var mx = 0; Object.keys(tots).forEach(function(k){ if (tots[k] > mx) mx = tots[k]; }); if (!mx) mx = 1;
   var entries = Object.keys(tots).map(function(k){ return [k, tots[k]]; }).sort(function(a,b){ return b[1] - a[1]; });
+
+  if (!entries.length) {
+    document.getElementById("cchart").innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;">No data for this period</div>';
+    return;
+  }
+
   var h = "";
   entries.forEach(function(pair) {
     var c = CATS[pair[0]] || CATS["Other"];
     var pct = Math.round(pair[1] / mx * 100);
-    h += '<div class="cr"><div class="crl"><span>' + c.label + '</span><span>' + fmt(pair[1]) + '</span></div>' +
+    var pcOfTotal = total > 0 ? Math.round(pair[1] / total * 100) + "%" : "";
+    h += '<div class="cr"><div class="crl"><span>' + c.label + '</span>' +
+         '<span style="display:flex;gap:8px;align-items:center;">' +
+         '<span style="font-size:10px;color:var(--burnt);font-weight:700;">' + pcOfTotal + '</span>' +
+         '<span>' + fmt(pair[1]) + '</span></span></div>' +
          '<div class="bt"><div class="bf" style="width:' + pct + '%"></div></div></div>';
   });
   document.getElementById("cchart").innerHTML = h;
@@ -277,10 +436,113 @@ function renderHist() {
     var c = CATS[e.cat] || CATS["Other"];
     h += '<div class="ei">' +
          '<div class="ecat" style="background:' + c.color + '">' + c.emoji + '</div>' +
-         '<div class="edesc"><div class="et">' + e.desc + '</div><div class="em">' + e.date + " " + e.mode + '</div></div>' +
-         '<div class="eamt">-' + fmt(e.amt) + '</div></div>';
+         '<div class="edesc"><div class="et">' + (e.desc || "—") + '</div><div class="em">' + e.date + ' · ' + e.mode + '</div></div>' +
+         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">' +
+         '<div class="eamt">-' + fmt(e.amt) + '</div>' +
+         '<button class="editbtn" onclick="openEdit(' + e.id + ')">Edit</button>' +
+         '</div></div>';
   });
-  document.getElementById("txlist").innerHTML = h;
+  document.getElementById("txlist").innerHTML = h || '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No expenses yet</div>';
+}
+
+var editingId = null;
+
+function openEdit(id) {
+  var e = null;
+  for (var i = 0; i < data.length; i++) { if (data[i].id === id) { e = data[i]; break; } }
+  if (!e) return;
+  editingId = id;
+  document.getElementById("eAmt").value  = e.amt;
+  document.getElementById("eDesc").value = e.desc || "";
+  document.getElementById("eCat").value  = e.cat;
+  document.getElementById("eMode").value = e.mode;
+  document.getElementById("eDate").value = e.date;
+  var ov = document.getElementById("editOverlay");
+  ov.style.display = "flex";
+  // Prevent body scroll while modal open
+  document.body.style.overflow = "hidden";
+}
+
+function closeEdit() {
+  document.getElementById("editOverlay").style.display = "none";
+  document.body.style.overflow = "";
+  editingId = null;
+}
+
+function saveEdit() {
+  var amt = parseFloat(document.getElementById("eAmt").value);
+  if (!amt || amt <= 0) { showToast("Enter a valid amount"); return; }
+  for (var i = 0; i < data.length; i++) {
+    if (data[i].id === editingId) {
+      data[i].amt  = amt;
+      data[i].desc = document.getElementById("eDesc").value.trim();
+      data[i].cat  = document.getElementById("eCat").value;
+      data[i].mode = document.getElementById("eMode").value;
+      data[i].date = document.getElementById("eDate").value;
+      break;
+    }
+  }
+  saveData();
+  render();
+  renderHist();
+  closeEdit();
+  showToast("Expense updated!");
+}
+
+function deleteExpense() {
+  if (!editingId) return;
+  for (var i = 0; i < data.length; i++) {
+    if (data[i].id === editingId) { data.splice(i, 1); break; }
+  }
+  saveData();
+  render();
+  renderHist();
+  closeEdit();
+  showToast("Expense deleted!");
+}
+
+function downloadExcel() {
+  // Build CSV content (opens in Excel perfectly)
+  var rows = [["Date","Time","Category","Description","Amount (Rs)","Payment Mode"]];
+  var sorted = data.slice().sort(function(a,b){ return (a.date+a.time).localeCompare(b.date+b.time); });
+  sorted.forEach(function(e) {
+    var c = CATS[e.cat] || CATS["Other"];
+    rows.push([e.date, e.time, c.label, e.desc || "", e.amt, e.mode]);
+  });
+
+  // Add summary at bottom
+  rows.push([]);
+  rows.push(["SUMMARY"]);
+  rows.push(["Total Expenses", "", "", "", data.reduce(function(s,e){return s+e.amt;},0), ""]);
+
+  // Category totals
+  var tots = {};
+  data.forEach(function(e){ tots[e.cat]=(tots[e.cat]||0)+e.amt; });
+  Object.keys(tots).forEach(function(k){
+    var c = CATS[k]||CATS["Other"];
+    rows.push([c.label, "", "", "", tots[k], ""]);
+  });
+
+  var csv = rows.map(function(r){
+    return r.map(function(cell){
+      var s = String(cell === null || cell === undefined ? "" : cell);
+      if (s.indexOf(",") !== -1 || s.indexOf('"') !== -1 || s.indexOf("\n") !== -1) {
+        s = '"' + s.replace(/"/g,'""') + '"';
+      }
+      return s;
+    }).join(",");
+  }).join("\n");
+
+  var blob = new Blob(["\uFEFF" + csv], {type: "text/csv;charset=utf-8;"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "XpenseTrack_" + new Date().toISOString().slice(0,10) + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("Downloaded! Open in Excel");
 }
 
 function saveExpense() {
@@ -445,5 +707,6 @@ init();
   }
 })();
 </script>
+
 </body>
 </html>
