@@ -1,34 +1,35 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-
-<!-- PWA: Makes it open full screen with no browser UI when added to Home Screen -->
-
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="XpenseTrack">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1A1A2E">
-
-<!-- App icon shown on Home Screen (generates from inline SVG via JS below) -->
-
 <link rel="apple-touch-icon" id="appIcon">
-
-<title>XpenseTrack</title>
+<title>XpenseTrack Family</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <style>
 :root{--ink:#1A1A2E;--cream:#F8F4EF;--burnt:#C8762B;--gold:#E8D5B7;--muted:#8A7E72;--card:#fff;--border:#E5DDD4;--red:#E53935;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html{height:100%;height:-webkit-fill-available;}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;min-height:-webkit-fill-available;overflow-x:hidden;}
-header{background:var(--ink);padding:14px 16px;padding-top:max(14px, env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+header{background:var(--ink);padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
 .logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--gold);}
 .logo em{color:#E8954A;font-style:italic;}
+.hright{display:flex;align-items:center;gap:8px;}
+.userbadge{background:#2A2A4E;border:1px solid #3A3A5E;border-radius:20px;padding:4px 10px;font-size:10px;font-weight:600;color:var(--gold);cursor:pointer;display:flex;align-items:center;gap:4px;}
+.syncdot{width:6px;height:6px;border-radius:50%;background:#4CAF50;flex-shrink:0;}
+.syncdot.off{background:#888;}
 .dtag{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
-.page{display:none;padding:14px 14px 0;padding-bottom:calc(80px + env(safe-area-inset-bottom, 20px));}
+.page{display:none;padding:14px 14px 0;padding-bottom:calc(80px + env(safe-area-inset-bottom,20px));}
 .page.active{display:block;}
 .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
 .sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;border-left:3px solid var(--burnt);}
@@ -70,9 +71,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .dbw{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
 .db{width:100%;border-radius:4px 4px 0 0;background:var(--burnt);min-height:4px;}
 .dlbl{font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);}
-.toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom, 20px));left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--gold);border:1px solid var(--burnt);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .25s ease;z-index:999;white-space:nowrap;pointer-events:none;}
+.toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,20px));left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--gold);border:1px solid var(--burnt);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .25s ease;z-index:999;white-space:nowrap;pointer-events:none;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--ink);display:flex;flex-direction:row;border-top:1px solid rgba(255,255,255,.1);z-index:100;padding-bottom:env(safe-area-inset-bottom, 16px);}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--ink);display:flex;flex-direction:row;border-top:1px solid rgba(255,255,255,.1);z-index:100;padding-bottom:env(safe-area-inset-bottom,16px);}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;border:none;background:transparent;color:var(--muted);font-size:10px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;gap:4px;touch-action:manipulation;min-height:56px;-webkit-appearance:none;-webkit-user-select:none;user-select:none;}
 .nb .ni{font-size:24px;line-height:1;display:block;}
 .nb.active{color:#E8954A;}
@@ -90,17 +91,59 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .fp{background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:20px;color:var(--muted);font-size:10px;font-weight:700;padding:3px 9px;cursor:pointer;touch-action:manipulation;font-family:'DM Sans',sans-serif;-webkit-appearance:none;}
 .fp.active{background:var(--burnt);border-color:var(--burnt);color:#fff;}
 .fp:active{opacity:.7;}
+.who{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:4px;vertical-align:middle;}
+/* Setup config card */
+.cfginput{border:1.5px solid var(--border);border-radius:8px;padding:11px 12px;font-size:15px;color:var(--ink);background:#fff;outline:none;width:100%;font-family:'DM Sans',sans-serif;margin-bottom:8px;}
+.cfginput:focus{border-color:var(--burnt);}
+.cfgbtn{background:var(--burnt);color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:4px;touch-action:manipulation;}
+.cfgbtn:active{opacity:.8;}
+.codebox{background:#1A1A2E;border-radius:10px;padding:12px;font-family:'DM Mono',monospace;font-size:11px;color:#E8D5B7;word-break:break-all;line-height:1.7;margin-bottom:8px;}
+.codebox span{color:#E8954A;}
+/* Onboarding overlay */
+#onboard{position:fixed;inset:0;background:var(--ink);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+#onboard h1{font-family:'DM Serif Display',serif;font-size:28px;color:var(--gold);margin-bottom:6px;text-align:center;}
+#onboard p{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px;line-height:1.6;}
+#onboard input{border:1.5px solid #3A3A5E;border-radius:10px;padding:14px;font-size:16px;color:var(--gold);background:#2A2A4E;outline:none;width:100%;margin-bottom:12px;font-family:'DM Sans',sans-serif;text-align:center;}
+#onboard input::placeholder{color:#5A5A7A;}
+#onboard input:focus{border-color:var(--burnt);}
+#onboard button{background:var(--burnt);color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;width:100%;touch-action:manipulation;}
+#onboard .hint{font-size:11px;color:#5A5A7A;text-align:center;margin-top:14px;line-height:1.6;}
+/* Loader */
+#loader{position:fixed;inset:0;background:var(--ink);z-index:400;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+#loader .spin{width:36px;height:36px;border:3px solid #3A3A5E;border-top-color:var(--burnt);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#loader p{font-size:13px;color:var(--muted);}
 </style>
 </head>
 <body>
 
+<!-- Onboarding — shown only on first open -->
+<div id="onboard">
+  <div style="font-size:48px;margin-bottom:12px;">💰</div>
+  <h1>XpenseTrack</h1>
+  <p>Family expense tracker.<br>Your name appears on every expense you add.</p>
+  <input type="text" id="nameInput" placeholder="Your name e.g. Bismeet" maxlength="20" autocomplete="off">
+  <button id="nameBtn">Get Started</button>
+  <div class="hint">Everyone in your family uses the same link.<br>Data syncs in real time across all devices.</div>
+</div>
+
+<!-- Loading screen -->
+<div id="loader" style="display:none;">
+  <div class="spin"></div>
+  <p>Connecting to family sync…</p>
+</div>
+
 <header>
   <div class="logo">Xpense<em>Track</em></div>
-  <div class="dtag" id="dtag">-</div>
+  <div class="hright">
+    <div class="userbadge" id="userBadge" onclick="showNameEdit()">
+      <div class="syncdot off" id="syncDot"></div>
+      <span id="userLabel">-</span>
+    </div>
+  </div>
 </header>
 
 <!-- Dashboard -->
-
 <div class="page active" id="p-dash">
   <div class="sgrid" id="sgrid"></div>
   <div class="card">
@@ -125,10 +168,14 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
     <div class="cb" id="cchart"></div>
   </div>
+  <!-- Family activity -->
+  <div class="card">
+    <div class="ch"><div class="ct">Family Activity</div><div style="font-size:10px;color:var(--muted)" id="famCount">-</div></div>
+    <div class="cb" id="famList"></div>
+  </div>
 </div>
 
 <!-- Add -->
-
 <div class="page" id="p-add">
   <div class="smsbox">
     <div class="smslbl">Paste Bank SMS to Auto-fill</div>
@@ -167,17 +214,65 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <!-- History -->
-
 <div class="page" id="p-hist">
-  <button class="dlbtn" id="dlbtn">&#x2B07; Download as Excel</button>
+  <button class="dlbtn" id="dlbtn">⬇ Download as Excel</button>
   <div class="card">
     <div class="ch"><div class="ct">All Transactions</div><div style="font-size:10px;color:var(--muted)" id="txcount">-</div></div>
     <div class="cb" id="txlist"></div>
   </div>
 </div>
 
-<!-- Edit Modal -->
+<!-- Setup -->
+<div class="page" id="p-setup">
 
+  <!-- Firebase config -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="ch"><div class="ct">🔥 Firebase Sync Config</div></div>
+    <div class="cb">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;">Paste your Firebase config below to enable family sync. See the guide in Setup tab for how to get this.</p>
+      <textarea id="fbConfigInput" style="width:100%;height:120px;background:#1A1A2E;border:1.5px solid #3A3A5E;border-radius:8px;padding:10px;font-family:'DM Mono',monospace;font-size:11px;color:#E8D5B7;outline:none;resize:none;line-height:1.6;" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}'></textarea>
+      <button class="cfgbtn" id="fbSaveBtn">Save & Connect</button>
+      <div id="fbStatus" style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;"></div>
+    </div>
+  </div>
+
+  <!-- Your name -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="ch"><div class="ct">👤 Your Name</div></div>
+    <div class="cb">
+      <input class="cfginput" type="text" id="nameChangeInput" placeholder="Your display name" maxlength="20">
+      <button class="cfgbtn" id="nameSaveBtn">Update Name</button>
+    </div>
+  </div>
+
+  <!-- How to setup Firebase -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="ch"><div class="ct">How to Set Up Firebase</div></div>
+    <div class="cb">
+      <div class="step"><div class="snum">1</div><div class="stxt"><div class="st">Go to firebase.google.com</div><div class="ss">Sign in with your Google account → click "Get Started"</div></div></div>
+      <div class="step"><div class="snum">2</div><div class="stxt"><div class="st">Create a project</div><div class="ss">Click "Add project" → name it "xpensetrack" → skip Google Analytics → Create</div></div></div>
+      <div class="step"><div class="snum">3</div><div class="stxt"><div class="st">Add a Web App</div><div class="ss">Click the &lt;/&gt; icon → name it "xpensetrack-web" → Register app → copy the firebaseConfig object</div></div></div>
+      <div class="step"><div class="snum">4</div><div class="stxt"><div class="st">Set up Firestore</div><div class="ss">In left sidebar → Build → Firestore Database → Create database → Start in test mode → Choose any region → Enable</div></div></div>
+      <div class="step"><div class="snum">5</div><div class="stxt"><div class="st">Paste config above</div><div class="ss">Go to Setup tab in this app → paste the config JSON → Save & Connect</div></div></div>
+      <div class="step"><div class="snum">6</div><div class="stxt"><div class="st">Share the link</div><div class="ss">Share your GitHub Pages URL with family. Everyone uses the same link — data syncs instantly!</div></div></div>
+    </div>
+  </div>
+
+  <!-- Mobile usage tips -->
+  <div class="card">
+    <div class="ch"><div class="ct">Supported SMS Formats</div></div>
+    <div class="cb" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:2.2;">
+      HDFC: Rs.280 debited... Info: UPI/Zomato<br>
+      SBI: INR 1200 debited from SBI A/c<br>
+      ICICI: Rs 450 spent at Apollo Pharmacy<br>
+      Axis: Rs.65.00 debited at Ola<br>
+      Kotak: Rs 399 paid to Amazon<br>
+      Any SMS with Rs / INR + amount
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
 <div id="editOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-end;">
   <div style="background:var(--cream);border-radius:20px 20px 0 0;padding:20px 16px 40px;width:100%;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -217,40 +312,26 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   </div>
 </div>
 
-<!-- Setup -->
-
-<div class="page" id="p-setup">
-  <div class="card" style="margin-bottom:14px;">
-    <div class="ch"><div class="ct">How to Use on Mobile</div></div>
-    <div class="cb">
-      <div class="step"><div class="snum">1</div><div class="stxt"><div class="st">Save to Home Screen</div><div class="ss">iOS: Share - Add to Home Screen<br>Android: Menu - Add to Home Screen</div></div></div>
-      <div class="step"><div class="snum">2</div><div class="stxt"><div class="st">Copy your bank SMS</div><div class="ss">Long-press the SMS alert and tap Copy</div></div></div>
-      <div class="step"><div class="snum">3</div><div class="stxt"><div class="st">Open app, tap Add tab</div><div class="ss">Long-press the dark box, tap Paste, then tap Auto-fill</div></div></div>
-      <div class="step"><div class="snum">4</div><div class="stxt"><div class="st">Verify and Save</div><div class="ss">Check the parsed fields and tap Save Expense</div></div></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="ch"><div class="ct">Supported SMS Formats</div></div>
-    <div class="cb" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:2.2;">
-      HDFC: Rs.280 debited... Info: UPI/Zomato<br>
-      SBI: INR 1200 debited from SBI A/c<br>
-      ICICI: Rs 450 spent at Apollo Pharmacy<br>
-      Axis: Rs.65.00 debited at Ola<br>
-      Kotak: Rs 399 paid to Amazon<br>
-      Any SMS with Rs / INR + amount
-    </div>
+<!-- Name edit modal -->
+<div id="nameOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center;">
+  <div style="background:var(--cream);border-radius:16px;padding:24px 20px;width:calc(100% - 40px);max-width:320px;">
+    <div style="font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:14px;">Change Name</div>
+    <input type="text" id="nameOverlayInput" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;font-size:16px;color:var(--ink);background:var(--cream);outline:none;width:100%;margin-bottom:12px;" maxlength="20">
+    <button onclick="saveName()" style="background:var(--burnt);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-bottom:8px;">Save</button>
+    <button onclick="document.getElementById('nameOverlay').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:8px;padding:11px;font-size:14px;color:var(--muted);cursor:pointer;width:100%;">Cancel</button>
   </div>
 </div>
 
 <div class="bnav">
-  <button class="nb active" id="nb-dash"><span class="ni">&#x1F4CA;</span>Dashboard</button>
-  <button class="nb" id="nb-add"><span class="ni">&#x2795;</span>Add</button>
-  <button class="nb" id="nb-hist"><span class="ni">&#x1F4CB;</span>History</button>
-  <button class="nb" id="nb-setup"><span class="ni">&#x2699;&#xFE0F;</span>Setup</button>
+  <button class="nb active" id="nb-dash"><span class="ni">📊</span>Dashboard</button>
+  <button class="nb" id="nb-add"><span class="ni">➕</span>Add</button>
+  <button class="nb" id="nb-hist"><span class="ni">📋</span>History</button>
+  <button class="nb" id="nb-setup"><span class="ni">⚙️</span>Setup</button>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
+// ── CATEGORY DEFINITIONS ─────────────────────────────────────
 var CATS = {
   "Food":          {label:"Food and Dining", emoji:"🍽️", color:"#FFF3E0"},
   "Transport":     {label:"Transport",       emoji:"🚗",  color:"#E8F5E9"},
@@ -262,84 +343,245 @@ var CATS = {
   "Other":         {label:"Other",           emoji:"📦",  color:"#F5F5F5"}
 };
 
-var data = JSON.parse(localStorage.getItem("xpense_data") || "[]");
-
-function saveData() {
-  localStorage.setItem("xpense_data", JSON.stringify(data));
+// Member colours (cycles through palette)
+var MEMBER_COLORS = ["#C8762B","#2E7D32","#1565C0","#6A1B9A","#AD1457","#00695C","#E65100","#4E342E"];
+function memberColor(name) {
+  if (!name) return "#888";
+  var idx = 0;
+  for (var i = 0; i < name.length; i++) idx += name.charCodeAt(i);
+  return MEMBER_COLORS[idx % MEMBER_COLORS.length];
 }
+
+// ── STATE ────────────────────────────────────────────────────
+var data       = [];          // live array, synced from Firestore
+var db         = null;        // Firestore instance (null until configured)
+var unsubscribe = null;       // Firestore listener cleanup fn
+var currentUser = localStorage.getItem("xpense_user") || "";
+var barDays    = 8;
+var catDays    = 8;
+var editingId  = null;
+var editingFireId = null;
+
+// ── ONBOARDING ───────────────────────────────────────────────
+function checkOnboard() {
+  if (!currentUser) {
+    document.getElementById("onboard").style.display = "flex";
+  } else {
+    document.getElementById("onboard").style.display = "none";
+    document.getElementById("userLabel").textContent = currentUser;
+    bootApp();
+  }
+}
+
+document.getElementById("nameBtn").addEventListener("click", function() {
+  var n = document.getElementById("nameInput").value.trim();
+  if (!n) { document.getElementById("nameInput").placeholder = "Please enter your name!"; return; }
+  currentUser = n;
+  localStorage.setItem("xpense_user", n);
+  document.getElementById("onboard").style.display = "none";
+  document.getElementById("userLabel").textContent = n;
+  bootApp();
+});
+document.getElementById("nameInput").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("nameBtn").click(); });
+
+// ── BOOT ─────────────────────────────────────────────────────
+function bootApp() {
+  var now = new Date();
+  document.getElementById("dtag") && (document.getElementById("dtag").textContent =
+    now.toLocaleDateString("en-IN", {day:"numeric", month:"short", year:"numeric"}));
+  document.getElementById("fDate").value = now.toISOString().slice(0, 10);
+  document.getElementById("nameChangeInput").value = currentUser;
+
+  // Try to init Firebase with stored config
+  var storedCfg = localStorage.getItem("xpense_fb_config");
+  if (storedCfg) {
+    try { initFirebase(JSON.parse(storedCfg)); } catch(e) { fallbackToLocal(); }
+  } else {
+    fallbackToLocal();
+  }
+  // Pre-fill firebase config textarea
+  if (storedCfg) document.getElementById("fbConfigInput").value = storedCfg;
+}
+
+// ── FIREBASE INIT ────────────────────────────────────────────
+function initFirebase(config) {
+  try {
+    // Avoid re-initialising
+    if (firebase.apps.length === 0) {
+      firebase.initializeApp(config);
+    }
+    db = firebase.firestore();
+    startSync();
+    document.getElementById("fbStatus").textContent = "✅ Connected to Firebase";
+    document.getElementById("fbStatus").style.color = "#2E7D32";
+  } catch(err) {
+    document.getElementById("fbStatus").textContent = "❌ " + err.message;
+    document.getElementById("fbStatus").style.color = "#E53935";
+    fallbackToLocal();
+  }
+}
+
+function startSync() {
+  if (unsubscribe) unsubscribe(); // clean up old listener
+  var loader = document.getElementById("loader");
+  loader.style.display = "flex";
+
+  unsubscribe = db.collection("expenses")
+    .orderBy("createdAt", "desc")
+    .onSnapshot(function(snap) {
+      data = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        d._fireId = doc.id;
+        // Ensure numeric id for edit compatibility
+        if (!d.id) d.id = doc.id;
+        data.push(d);
+      });
+      loader.style.display = "none";
+      document.getElementById("syncDot").classList.remove("off");
+      render();
+      if (document.getElementById("p-hist").classList.contains("active")) renderHist();
+      if (document.getElementById("p-dash").classList.contains("active")) renderFamily();
+    }, function(err) {
+      loader.style.display = "none";
+      showToast("Sync error — check config");
+      fallbackToLocal();
+    });
+}
+
+function fallbackToLocal() {
+  // Use localStorage as fallback — old data is never lost
+  data = JSON.parse(localStorage.getItem("xpense_data") || "[]");
+  document.getElementById("syncDot").classList.add("off");
+  render();
+  if (document.getElementById("p-hist").classList.contains("active")) renderHist();
+}
+
+// ── SAVE / EDIT / DELETE ─────────────────────────────────────
+function saveExpense() {
+  var amt = parseFloat(document.getElementById("fAmt").value);
+  if (!amt || amt <= 0) { showToast("Enter a valid amount"); return; }
+  var now = new Date();
+  var nowISO = now.toISOString();
+
+  var entry = {
+    id:        Date.now(),
+    date:      document.getElementById("fDate").value,
+    time:      now.toTimeString().slice(0, 5),
+    cat:       document.getElementById("fCat").value,
+    desc:      document.getElementById("fDesc").value.trim(),
+    amt:       amt,
+    mode:      document.getElementById("fMode").value,
+    addedBy:   currentUser || "Unknown",
+    createdAt: nowISO
+  };
+
+  if (db) {
+    // Use Firestore server timestamp for accurate ordering
+    var fsEntry = {};
+    for (var k in entry) fsEntry[k] = entry[k];
+    try { fsEntry.createdAt = firebase.firestore.FieldValue.serverTimestamp(); } catch(e2) {}
+    db.collection("expenses").add(fsEntry)
+      .then(function(){ showToast("Saved!"); resetAddForm(); })
+      .catch(function(err){ showToast("Error: " + err.message); });
+  } else {
+    // Local fallback - works fully without Firebase configured
+    data.unshift(entry);
+    localStorage.setItem("xpense_data", JSON.stringify(data));
+    render();
+    if (document.getElementById("p-hist").classList.contains("active")) renderHist();
+    showToast("Saved!");
+    resetAddForm();
+  }
+}
+
+function resetAddForm() {
+  document.getElementById("fAmt").value  = "";
+  document.getElementById("fDesc").value = "";
+  document.getElementById("smsText").value = "";
+}
+
+function openEdit(fireId) {
+  var e = data.find(function(x){ return x._fireId === fireId || String(x.id) === String(fireId); });
+  if (!e) return;
+  editingId     = e.id;
+  editingFireId = e._fireId;
+  document.getElementById("eAmt").value  = e.amt;
+  document.getElementById("eDesc").value = e.desc || "";
+  document.getElementById("eCat").value  = e.cat;
+  document.getElementById("eMode").value = e.mode;
+  document.getElementById("eDate").value = e.date;
+  document.getElementById("editOverlay").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closeEdit() {
+  document.getElementById("editOverlay").style.display = "none";
+  document.body.style.overflow = "";
+  editingId = null; editingFireId = null;
+}
+
+function saveEdit() {
+  var amt = parseFloat(document.getElementById("eAmt").value);
+  if (!amt || amt <= 0) { showToast("Enter a valid amount"); return; }
+  var updates = {
+    amt:  amt,
+    desc: document.getElementById("eDesc").value.trim(),
+    cat:  document.getElementById("eCat").value,
+    mode: document.getElementById("eMode").value,
+    date: document.getElementById("eDate").value
+  };
+  if (db && editingFireId) {
+    db.collection("expenses").doc(editingFireId).update(updates)
+      .then(function(){ showToast("Updated!"); closeEdit(); })
+      .catch(function(e){ showToast("Error: " + e.message); });
+  } else {
+    var idx = data.findIndex(function(x){ return x.id === editingId; });
+    if (idx > -1) { Object.assign(data[idx], updates); }
+    localStorage.setItem("xpense_data", JSON.stringify(data));
+    render(); renderHist(); closeEdit();
+    showToast("Updated!");
+  }
+}
+
+function deleteExpense() {
+  if (!editingId && !editingFireId) return;
+  if (db && editingFireId) {
+    db.collection("expenses").doc(editingFireId).delete()
+      .then(function(){ showToast("Deleted"); closeEdit(); })
+      .catch(function(e){ showToast("Error: " + e.message); });
+  } else {
+    data = data.filter(function(x){ return x.id !== editingId; });
+    localStorage.setItem("xpense_data", JSON.stringify(data));
+    render(); renderHist(); closeEdit();
+    showToast("Deleted");
+  }
+}
+
+// ── RENDER ───────────────────────────────────────────────────
+function render() { renderStats(); renderDayBars(); renderCatChart(); renderFamily(); }
 
 function fmt(n) {
   return "Rs." + Number(n).toLocaleString("en-IN", {minimumFractionDigits:0, maximumFractionDigits:0});
 }
 
-function switchPage(name) {
-  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
-  document.querySelectorAll(".nb").forEach(function(b){ b.classList.remove("active"); });
-  document.getElementById("p-" + name).classList.add("active");
-  document.getElementById("nb-" + name).classList.add("active");
-  if (name === "hist") renderHist();
-}
-
-document.getElementById("nb-dash").addEventListener("click",  function(){ switchPage("dash"); });
-document.getElementById("nb-add").addEventListener("click",   function(){ switchPage("add"); });
-document.getElementById("nb-hist").addEventListener("click",  function(){ switchPage("hist"); });
-document.getElementById("nb-setup").addEventListener("click", function(){ switchPage("setup"); });
-document.getElementById("pbtn").addEventListener("click", parseSMS);
-document.getElementById("savebtn").addEventListener("click", saveExpense);
-document.getElementById("dlbtn").addEventListener("click", downloadExcel);
-
-// Filter pills — Daily Spend
-document.getElementById("barFilter").addEventListener("click", function(e){
-  var btn = e.target.closest(".fp");
-  if (!btn) return;
-  document.querySelectorAll("#barFilter .fp").forEach(function(b){ b.classList.remove("active"); });
-  btn.classList.add("active");
-  barDays = parseInt(btn.dataset.days);
-  renderDayBars();
-});
-
-// Filter pills — By Category
-document.getElementById("catFilter").addEventListener("click", function(e){
-  var btn = e.target.closest(".fp");
-  if (!btn) return;
-  document.querySelectorAll("#catFilter .fp").forEach(function(b){ b.classList.remove("active"); });
-  btn.classList.add("active");
-  catDays = parseInt(btn.dataset.days);
-  renderCatChart();
-});
-
-// Close edit modal when tapping the dark overlay background
-document.getElementById("editOverlay").addEventListener("click", function(e){
-  if (e.target === this) closeEdit();
-});
-
-function init() {
-  var now = new Date();
-  document.getElementById("dtag").textContent = now.toLocaleDateString("en-IN", {day:"numeric", month:"short", year:"numeric"});
-  document.getElementById("fDate").value = now.toISOString().slice(0, 10);
-  render();
-}
-
-function render() { renderStats(); renderDayBars(); renderCatChart(); }
-
 function renderStats() {
   var today = new Date().toISOString().slice(0, 10);
-  var texp = data.filter(function(e){ return e.date === today; });
+  var texp  = data.filter(function(e){ return e.date === today; });
   var total = 0; data.forEach(function(e){ total += e.amt; });
   var tday  = 0; texp.forEach(function(e){ tday  += e.amt; });
   var mkey  = today.slice(0, 7);
-  var mamt  = 0; data.filter(function(e){ return e.date.slice(0,7) === mkey; }).forEach(function(e){ mamt += e.amt; });
-  var udays = {}; data.forEach(function(e){ udays[e.date] = 1; });
+  var mamt  = 0; data.filter(function(e){ return e.date && e.date.slice(0,7) === mkey; }).forEach(function(e){ mamt += e.amt; });
+  var udays = {}; data.forEach(function(e){ if(e.date) udays[e.date] = 1; });
   var nd    = Object.keys(udays).length || 1;
+  var mn    = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var curMon = mn[new Date().getMonth()];
   document.getElementById("sgrid").innerHTML =
     '<div class="sc"><div class="slabel">Today</div><div class="sval">'        + fmt(tday)       + '</div><div class="ssub">' + texp.length + ' txns</div></div>' +
-    '<div class="sc"><div class="slabel">This Month</div><div class="sval">'   + fmt(mamt)       + '</div><div class="ssub">Mar 2026</div></div>' +
+    '<div class="sc"><div class="slabel">This Month</div><div class="sval">'   + fmt(mamt)       + '</div><div class="ssub">' + curMon + ' 2026</div></div>' +
     '<div class="sc"><div class="slabel">Daily Avg</div><div class="sval">'    + fmt(total / nd) + '</div><div class="ssub">per day</div></div>' +
     '<div class="sc"><div class="slabel">All Time</div><div class="sval">'     + fmt(total)      + '</div><div class="ssub">' + data.length + ' entries</div></div>';
 }
-
-var barDays = 8;
-var catDays = 8;
 
 function getFilteredData(days) {
   var cutoff = new Date();
@@ -351,52 +593,37 @@ function getFilteredData(days) {
 function renderDayBars() {
   var filtered = getFilteredData(barDays);
   var daily = {};
-  filtered.forEach(function(e){ daily[e.date] = (daily[e.date] || 0) + e.amt; });
-
-  // For 8D show individual days, for 1M/3M group by week
-  var dates, labels;
+  filtered.forEach(function(e){ daily[e.date] = (daily[e.date]||0) + e.amt; });
+  var dates, labels, disp = daily;
   if (barDays === 8) {
     dates = Object.keys(daily).sort().slice(-8);
-    labels = dates.map(function(d){ return d.slice(8); }); // day number
+    labels = dates.map(function(d){ return d.slice(8); });
   } else if (barDays === 30) {
-    // Group into ~4 weeks
     var weeks = {};
     Object.keys(daily).sort().forEach(function(d){
-      var dt = new Date(d);
-      // Week number within the period
-      var wk = "W" + Math.ceil((new Date() - dt) / (7 * 864e5));
-      weeks[wk] = (weeks[wk] || 0) + daily[d];
+      var wk = "W" + Math.ceil((new Date() - new Date(d)) / (7*864e5));
+      weeks[wk] = (weeks[wk]||0) + daily[d];
     });
-    // Reverse so oldest first
-    dates = Object.keys(weeks).sort().reverse();
-    labels = dates;
-    daily = weeks;
+    dates = Object.keys(weeks).sort().reverse(); labels = dates; disp = weeks;
   } else {
-    // 3M: group by month
     var months = {};
     Object.keys(daily).sort().forEach(function(d){
-      var m = d.slice(0, 7); // YYYY-MM
-      months[m] = (months[m] || 0) + daily[d];
+      var m = d.slice(0,7); months[m] = (months[m]||0) + daily[d];
     });
+    var mn2 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
     dates = Object.keys(months).sort();
-    labels = dates.map(function(m){
-      var parts = m.split("-");
-      var mn = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-      return mn[parseInt(parts[1]) - 1];
-    });
-    daily = months;
+    labels = dates.map(function(m){ return mn2[parseInt(m.split("-")[1])-1]; });
+    disp = months;
   }
-
   if (!dates.length) {
     document.getElementById("dbars").innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;">No data for this period</div>';
     return;
   }
-
-  var mx = 0; dates.forEach(function(d){ if (daily[d] > mx) mx = daily[d]; }); if (!mx) mx = 1;
+  var mx = 0; dates.forEach(function(d){ if((disp[d]||0)>mx) mx=disp[d]; }); if(!mx) mx=1;
   var h = "";
-  dates.forEach(function(d, i) {
-    var pct = Math.max(Math.round((daily[d] || 0) / mx * 100), 4);
-    h += '<div class="dbw"><div class="db" style="height:' + pct + '%"></div><div class="dlbl">' + labels[i] + '</div></div>';
+  dates.forEach(function(d,i){
+    var pct = Math.max(Math.round((disp[d]||0)/mx*100),4);
+    h += '<div class="dbw"><div class="db" style="height:'+pct+'%"></div><div class="dlbl">'+labels[i]+'</div></div>';
   });
   document.getElementById("dbars").innerHTML = h;
 }
@@ -404,309 +631,262 @@ function renderDayBars() {
 function renderCatChart() {
   var filtered = getFilteredData(catDays);
   var tots = {};
-  filtered.forEach(function(e){ tots[e.cat] = (tots[e.cat] || 0) + e.amt; });
-  var total = 0; Object.keys(tots).forEach(function(k){ total += tots[k]; });
-  var mx = 0; Object.keys(tots).forEach(function(k){ if (tots[k] > mx) mx = tots[k]; }); if (!mx) mx = 1;
-  var entries = Object.keys(tots).map(function(k){ return [k, tots[k]]; }).sort(function(a,b){ return b[1] - a[1]; });
-
+  filtered.forEach(function(e){ tots[e.cat]=(tots[e.cat]||0)+e.amt; });
+  var total = 0; Object.keys(tots).forEach(function(k){ total+=tots[k]; });
+  var mx=0; Object.keys(tots).forEach(function(k){ if(tots[k]>mx) mx=tots[k]; }); if(!mx) mx=1;
+  var entries = Object.keys(tots).map(function(k){ return [k,tots[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
   if (!entries.length) {
     document.getElementById("cchart").innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;">No data for this period</div>';
     return;
   }
-
   var h = "";
-  entries.forEach(function(pair) {
-    var c = CATS[pair[0]] || CATS["Other"];
-    var pct = Math.round(pair[1] / mx * 100);
-    var pcOfTotal = total > 0 ? Math.round(pair[1] / total * 100) + "%" : "";
-    h += '<div class="cr"><div class="crl"><span>' + c.label + '</span>' +
+  entries.forEach(function(pair){
+    var c = CATS[pair[0]]||CATS["Other"];
+    var pct = Math.round(pair[1]/mx*100);
+    var pcOfTotal = total > 0 ? Math.round(pair[1]/total*100)+"%" : "";
+    h += '<div class="cr"><div class="crl"><span>'+c.label+'</span>' +
          '<span style="display:flex;gap:8px;align-items:center;">' +
-         '<span style="font-size:10px;color:var(--burnt);font-weight:700;">' + pcOfTotal + '</span>' +
-         '<span>' + fmt(pair[1]) + '</span></span></div>' +
-         '<div class="bt"><div class="bf" style="width:' + pct + '%"></div></div></div>';
+         '<span style="font-size:10px;color:var(--burnt);font-weight:700;">'+pcOfTotal+'</span>' +
+         '<span>'+fmt(pair[1])+'</span></span></div>' +
+         '<div class="bt"><div class="bf" style="width:'+pct+'%"></div></div></div>';
   });
   document.getElementById("cchart").innerHTML = h;
 }
 
+function renderFamily() {
+  // Show last 5 expenses by any family member
+  var sorted = data.slice().sort(function(a,b){
+    var at = a.createdAt && a.createdAt.seconds ? a.createdAt.seconds : new Date(a.createdAt||0).getTime()/1000;
+    var bt = b.createdAt && b.createdAt.seconds ? b.createdAt.seconds : new Date(b.createdAt||0).getTime()/1000;
+    return bt - at;
+  }).slice(0, 8);
+  document.getElementById("famCount").textContent = data.length + " total";
+  var h = "";
+  sorted.forEach(function(e){
+    var c = CATS[e.cat]||CATS["Other"];
+    var who = e.addedBy || "Unknown";
+    var col = memberColor(who);
+    h += '<div class="ei">' +
+         '<div class="ecat" style="background:'+c.color+'">'+c.emoji+'</div>' +
+         '<div class="edesc">' +
+           '<div class="et">'+(e.desc||c.label)+'</div>' +
+           '<div class="em">'+e.date+' · ' +
+             '<span class="who" style="background:'+col+'22;color:'+col+'">'+who+'</span>' +
+           '</div>' +
+         '</div>' +
+         '<div class="eamt">-'+fmt(e.amt)+'</div>' +
+         '</div>';
+  });
+  document.getElementById("famList").innerHTML = h || '<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">No expenses yet — add your first one!</div>';
+}
+
 function renderHist() {
-  var sorted = data.slice().sort(function(a,b){ return (b.date + b.time).localeCompare(a.date + a.time); });
+  var sorted = data.slice().sort(function(a,b){ return (b.date+b.time).localeCompare(a.date+a.time); });
   document.getElementById("txcount").textContent = sorted.length + " entries";
   var h = "";
-  sorted.forEach(function(e) {
-    var c = CATS[e.cat] || CATS["Other"];
+  sorted.forEach(function(e){
+    var c = CATS[e.cat]||CATS["Other"];
+    var who = e.addedBy || "";
+    var col = memberColor(who);
+    var fid = e._fireId || String(e.id);
     h += '<div class="ei">' +
-         '<div class="ecat" style="background:' + c.color + '">' + c.emoji + '</div>' +
-         '<div class="edesc"><div class="et">' + (e.desc || "—") + '</div><div class="em">' + e.date + ' · ' + e.mode + '</div></div>' +
+         '<div class="ecat" style="background:'+c.color+'">'+c.emoji+'</div>' +
+         '<div class="edesc">' +
+           '<div class="et">'+(e.desc||"—")+'</div>' +
+           '<div class="em">'+e.date+' · '+e.mode+
+             (who ? ' · <span class="who" style="background:'+col+'22;color:'+col+'">'+who+'</span>' : '')+
+           '</div>' +
+         '</div>' +
          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">' +
-         '<div class="eamt">-' + fmt(e.amt) + '</div>' +
-         '<button class="editbtn" onclick="openEdit(' + e.id + ')">Edit</button>' +
+           '<div class="eamt">-'+fmt(e.amt)+'</div>' +
+           '<button class="editbtn" onclick="openEdit(\''+fid+'\')">Edit</button>' +
          '</div></div>';
   });
   document.getElementById("txlist").innerHTML = h || '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No expenses yet</div>';
 }
 
-var editingId = null;
-
-function openEdit(id) {
-  var e = null;
-  for (var i = 0; i < data.length; i++) { if (data[i].id === id) { e = data[i]; break; } }
-  if (!e) return;
-  editingId = id;
-  document.getElementById("eAmt").value  = e.amt;
-  document.getElementById("eDesc").value = e.desc || "";
-  document.getElementById("eCat").value  = e.cat;
-  document.getElementById("eMode").value = e.mode;
-  document.getElementById("eDate").value = e.date;
-  var ov = document.getElementById("editOverlay");
-  ov.style.display = "flex";
-  // Prevent body scroll while modal open
-  document.body.style.overflow = "hidden";
-}
-
-function closeEdit() {
-  document.getElementById("editOverlay").style.display = "none";
-  document.body.style.overflow = "";
-  editingId = null;
-}
-
-function saveEdit() {
-  var amt = parseFloat(document.getElementById("eAmt").value);
-  if (!amt || amt <= 0) { showToast("Enter a valid amount"); return; }
-  for (var i = 0; i < data.length; i++) {
-    if (data[i].id === editingId) {
-      data[i].amt  = amt;
-      data[i].desc = document.getElementById("eDesc").value.trim();
-      data[i].cat  = document.getElementById("eCat").value;
-      data[i].mode = document.getElementById("eMode").value;
-      data[i].date = document.getElementById("eDate").value;
-      break;
-    }
-  }
-  saveData();
-  render();
-  renderHist();
-  closeEdit();
-  showToast("Expense updated!");
-}
-
-function deleteExpense() {
-  if (!editingId) return;
-  for (var i = 0; i < data.length; i++) {
-    if (data[i].id === editingId) { data.splice(i, 1); break; }
-  }
-  saveData();
-  render();
-  renderHist();
-  closeEdit();
-  showToast("Expense deleted!");
-}
-
+// ── DOWNLOAD EXCEL ───────────────────────────────────────────
 function downloadExcel() {
-  // Build CSV content (opens in Excel perfectly)
-  var rows = [["Date","Time","Category","Description","Amount (Rs)","Payment Mode"]];
+  var rows = [["Date","Time","Category","Description","Amount (Rs)","Payment Mode","Added By"]];
   var sorted = data.slice().sort(function(a,b){ return (a.date+a.time).localeCompare(b.date+b.time); });
-  sorted.forEach(function(e) {
-    var c = CATS[e.cat] || CATS["Other"];
-    rows.push([e.date, e.time, c.label, e.desc || "", e.amt, e.mode]);
+  sorted.forEach(function(e){
+    var c = CATS[e.cat]||CATS["Other"];
+    rows.push([e.date, e.time, c.label, e.desc||"", e.amt, e.mode, e.addedBy||""]);
   });
-
-  // Add summary at bottom
-  rows.push([]);
-  rows.push(["SUMMARY"]);
-  rows.push(["Total Expenses", "", "", "", data.reduce(function(s,e){return s+e.amt;},0), ""]);
-
-  // Category totals
-  var tots = {};
+  rows.push([]); rows.push(["SUMMARY"]);
+  rows.push(["Total Expenses","","","",data.reduce(function(s,e){return s+e.amt;},0),""]);
+  var tots={};
   data.forEach(function(e){ tots[e.cat]=(tots[e.cat]||0)+e.amt; });
-  Object.keys(tots).forEach(function(k){
-    var c = CATS[k]||CATS["Other"];
-    rows.push([c.label, "", "", "", tots[k], ""]);
-  });
-
+  Object.keys(tots).forEach(function(k){ var c=CATS[k]||CATS["Other"]; rows.push([c.label,"","","",tots[k],""]); });
   var csv = rows.map(function(r){
     return r.map(function(cell){
-      var s = String(cell === null || cell === undefined ? "" : cell);
-      if (s.indexOf(",") !== -1 || s.indexOf('"') !== -1 || s.indexOf("\n") !== -1) {
-        s = '"' + s.replace(/"/g,'""') + '"';
-      }
+      var s=String(cell===null||cell===undefined?"":cell);
+      if(s.indexOf(",")!==-1||s.indexOf('"')!==-1||s.indexOf("\n")!==-1) s='"'+s.replace(/"/g,'""')+'"';
       return s;
     }).join(",");
   }).join("\n");
-
-  var blob = new Blob(["\uFEFF" + csv], {type: "text/csv;charset=utf-8;"});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement("a");
-  a.href = url;
-  a.download = "XpenseTrack_" + new Date().toISOString().slice(0,10) + ".csv";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  var blob = new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement("a");
+  a.href   = url;
+  a.download = "XpenseTrack_"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast("Downloaded! Open in Excel");
 }
 
-function saveExpense() {
-  var amt = parseFloat(document.getElementById("fAmt").value);
-  if (!amt || amt <= 0) { showToast("Enter a valid amount"); return; }
-  var desc = document.getElementById("fDesc").value.trim();
-  var now = new Date();
-  data.unshift({
-    id:   Date.now(),
-    date: document.getElementById("fDate").value,
-    time: now.toTimeString().slice(0, 5),
-    cat:  document.getElementById("fCat").value,
-    desc: desc,
-    amt:  amt,
-    mode: document.getElementById("fMode").value
-  });
-  saveData();
-  render();
-  showToast("Expense saved!");
-  document.getElementById("fAmt").value  = "";
-  document.getElementById("fDesc").value = "";
-  document.getElementById("smsText").value = "";
-}
-
+// ── SMS PARSER ───────────────────────────────────────────────
 function parseSMS() {
   var text = document.getElementById("smsText").value.trim();
   if (!text) { showToast("Paste an SMS first"); return; }
-
-  // --- Extract amount ---
-  var amt = null;
+  var amt = 0;
   var amtTests = [
-    function(t){ var m = t.match(/(?:Rs\.?|INR)\s*([\d,]+(?:\.\d{1,2})?)/i);  return m ? m[1] : null; },
-    function(t){ var m = t.match(/(?:debited|credited|paid|spent)\s+(?:Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)/i); return m ? m[1] : null; },
-    function(t){ var m = t.match(/([\d,]+\.\d{2})\s*(?:has been\s+)?(?:debited|credited)/i); return m ? m[1] : null; },
-    function(t){ var m = t.match(/amount\s*:?\s*(?:Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)/i); return m ? m[1] : null; }
+    function(t){ var m=t.match(/(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{1,2})?)/i); return m?m[1]:null; },
+    function(t){ var m=t.match(/([\d,]+(?:\.\d{1,2})?)\s*(?:Rs\.?|INR|₹)/i); return m?m[1]:null; },
+    function(t){ var m=t.match(/([\d,]+\.\d{2})\s*(?:has been\s+)?(?:debited|credited)/i); return m?m[1]:null; },
+    function(t){ var m=t.match(/amount\s*:?\s*(?:Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)/i); return m?m[1]:null; }
   ];
-  for (var i = 0; i < amtTests.length; i++) {
-    var res = amtTests[i](text);
-    if (res) { amt = parseFloat(res.replace(/,/g, "")); break; }
-  }
-
-  // --- Extract description ---
-  var desc = "";
-  var descTests = [
-    function(t){ var m = t.match(/Info:\s*(?:UPI[-\/\s])?([A-Za-z0-9 &.\-]{2,30})(?:\/|\s|$)/i); return m ? m[1] : null; },
-    function(t){ var m = t.match(/(?:at|to)\s+([A-Za-z][A-Za-z0-9 &\-]{2,25})(?:\s+on|\s*[,.]|\s*Ref|$)/i); return m ? m[1] : null; },
-    function(t){ var m = t.match(/(?:paid to|trf to)\s+([A-Za-z][A-Za-z0-9 &\-]{2,25})/i); return m ? m[1] : null; },
-    function(t){ var m = t.match(/VPA\s+([a-z0-9.\-@]+)/i); return m ? m[1] : null; },
-    function(t){ var m = t.match(/Merchant:\s*([A-Za-z0-9 &\-]{2,30})/i); return m ? m[1] : null; }
+  for (var i=0;i<amtTests.length;i++){var r=amtTests[i](text);if(r){amt=parseFloat(r.replace(/,/g,""));break;}}
+  var desc="";
+  var descTests=[
+    function(t){var m=t.match(/Info:\s*(?:UPI[-\/\s])?([A-Za-z0-9 &.\-]{2,30})(?:\/|\s|$)/i);return m?m[1]:null;},
+    function(t){var m=t.match(/(?:at|to)\s+([A-Za-z][A-Za-z0-9 &\-]{2,25})(?:\s+on|\s*[,.]|\s*Ref|$)/i);return m?m[1]:null;},
+    function(t){var m=t.match(/(?:paid to|trf to)\s+([A-Za-z][A-Za-z0-9 &\-]{2,25})/i);return m?m[1]:null;},
+    function(t){var m=t.match(/VPA\s+([a-z0-9.\-@]+)/i);return m?m[1]:null;},
+    function(t){var m=t.match(/Merchant:\s*([A-Za-z0-9 &\-]{2,30})/i);return m?m[1]:null;}
   ];
-  for (var j = 0; j < descTests.length; j++) {
-    var r = descTests[j](text);
-    if (r) { desc = r.replace(/[_@]/g, " ").trim(); break; }
-  }
-
-  // --- Guess category ---
-  var catGuess = "Other";
-  var cmap = {
-    "Food":          ["swiggy","zomato","dominos","mcdonald","kfc","restaurant","cafe","canteen","food","pizza","burger","chai","dhaba","biryani","starbucks","dunkin","haldiram"],
-    "Transport":     ["uber","ola","rapido","metro","petrol","diesel","fuel","auto","toll","redbus","flight","indigo","irctc"],
-    "Shopping":      ["amazon","flipkart","myntra","ajio","meesho","nykaa","croma","decathlon"],
-    "Grocery":       ["dmart","bigbasket","blinkit","zepto","grofers","reliance fresh","grocery","vegetables","kirana"],
-    "Entertainment": ["netflix","hotstar","disney","zee5","pvr","inox","bookmyshow","spotify","gaana"],
-    "Healthcare":    ["pharmacy","medplus","apollo","1mg","netmeds","pharmeasy","medicine","hospital","doctor"],
-    "Utilities":     ["electricity","bses","tata power","adani","recharge","airtel","jio","vodafone","bsnl","broadband","igl","gas","water"]
+  for(var j=0;j<descTests.length;j++){var r2=descTests[j](text);if(r2){desc=r2.replace(/[_@]/g," ").trim();break;}}
+  var catGuess="Other";
+  var cmap={
+    "Food":["swiggy","zomato","dominos","mcdonald","kfc","restaurant","cafe","canteen","food","pizza","burger","chai","dhaba","biryani","starbucks","dunkin","haldiram"],
+    "Transport":["uber","ola","rapido","metro","petrol","diesel","fuel","auto","toll","redbus","flight","indigo","irctc"],
+    "Shopping":["amazon","flipkart","myntra","ajio","meesho","nykaa","croma","decathlon"],
+    "Grocery":["dmart","bigbasket","blinkit","zepto","grofers","reliance fresh","grocery","vegetables","kirana"],
+    "Entertainment":["netflix","hotstar","disney","zee5","pvr","inox","bookmyshow","spotify","gaana"],
+    "Healthcare":["pharmacy","medplus","apollo","1mg","netmeds","pharmeasy","medicine","hospital","doctor"],
+    "Utilities":["electricity","bses","tata power","adani","recharge","airtel","jio","vodafone","bsnl","broadband","igl","gas","water"]
   };
-  var hay = (text + " " + desc).toLowerCase();
-  var ck = Object.keys(cmap);
-  outer: for (var k = 0; k < ck.length; k++) {
-    var kws = cmap[ck[k]];
-    for (var l = 0; l < kws.length; l++) {
-      if (hay.indexOf(kws[l]) !== -1) { catGuess = ck[k]; break outer; }
-    }
-  }
-
-  // --- Parse date ---
-  var pdate = new Date().toISOString().slice(0, 10);
-  var mn = {jan:"01",feb:"02",mar:"03",apr:"04",may:"05",jun:"06",jul:"07",aug:"08",sep:"09",oct:"10",nov:"11",dec:"12"};
-  var dm = text.match(/(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{2,4})/);
-  if (dm) {
-    var yy = dm[3].length === 2 ? "20" + dm[3] : dm[3];
-    pdate = yy + "-" + (mn[dm[2].toLowerCase()] || "01") + "-" + dm[1].padStart(2, "0");
-  } else {
-    var dm2 = text.match(/(\d{2})[-\/](\d{2})[-\/](\d{4})/);
-    if (dm2) pdate = dm2[3] + "-" + dm2[2] + "-" + dm2[1];
-  }
-
-  // --- Fill fields ---
-  if (amt)  document.getElementById("fAmt").value  = amt;
-  if (desc) document.getElementById("fDesc").value = desc;
-  document.getElementById("fCat").value  = catGuess;
-  document.getElementById("fDate").value = pdate;
-
-  showToast(amt ? ("Parsed Rs." + amt + (desc ? " - " + desc.slice(0, 18) : "")) : "Amount not found - fill manually");
+  var hay=(text+" "+desc).toLowerCase();
+  var ck=Object.keys(cmap);
+  outer:for(var k=0;k<ck.length;k++){for(var l=0;l<cmap[ck[k]].length;l++){if(hay.indexOf(cmap[ck[k]][l])!==-1){catGuess=ck[k];break outer;}}}
+  var pdate=new Date().toISOString().slice(0,10);
+  var mn={jan:"01",feb:"02",mar:"03",apr:"04",may:"05",jun:"06",jul:"07",aug:"08",sep:"09",oct:"10",nov:"11",dec:"12"};
+  var dm=text.match(/(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{2,4})/);
+  if(dm){var yy=dm[3].length===2?"20"+dm[3]:dm[3];pdate=yy+"-"+(mn[dm[2].toLowerCase()]||"01")+"-"+dm[1].padStart(2,"0");}
+  else{var dm2=text.match(/(\d{2})[-\/](\d{2})[-\/](\d{4})/);if(dm2)pdate=dm2[3]+"-"+dm2[2]+"-"+dm2[1];}
+  if(amt)  document.getElementById("fAmt").value=amt;
+  if(desc) document.getElementById("fDesc").value=desc;
+  document.getElementById("fCat").value=catGuess;
+  document.getElementById("fDate").value=pdate;
+  showToast(amt?("Parsed Rs."+amt+(desc?" - "+desc.slice(0,18):"")):"Amount not found - fill manually");
 }
 
+// ── NAME MANAGEMENT ──────────────────────────────────────────
+function showNameEdit() {
+  document.getElementById("nameOverlayInput").value = currentUser;
+  document.getElementById("nameOverlay").style.display = "flex";
+}
+function saveName() {
+  var n = document.getElementById("nameOverlayInput").value.trim();
+  if (!n) return;
+  currentUser = n;
+  localStorage.setItem("xpense_user", n);
+  document.getElementById("userLabel").textContent = n;
+  document.getElementById("nameChangeInput").value = n;
+  document.getElementById("nameOverlay").style.display = "none";
+  showToast("Name updated to " + n);
+}
+
+// ── FIREBASE CONFIG SAVE ─────────────────────────────────────
+document.getElementById("fbSaveBtn").addEventListener("click", function(){
+  var raw = document.getElementById("fbConfigInput").value.trim();
+  try {
+    var cfg = JSON.parse(raw);
+    if (!cfg.apiKey || !cfg.projectId) throw new Error("Missing apiKey or projectId");
+    localStorage.setItem("xpense_fb_config", JSON.stringify(cfg));
+    initFirebase(cfg);
+  } catch(e) {
+    document.getElementById("fbStatus").textContent = "❌ Invalid JSON: " + e.message;
+    document.getElementById("fbStatus").style.color = "#E53935";
+  }
+});
+
+document.getElementById("nameSaveBtn").addEventListener("click", function(){
+  var n = document.getElementById("nameChangeInput").value.trim();
+  if (!n) return;
+  currentUser = n;
+  localStorage.setItem("xpense_user", n);
+  document.getElementById("userLabel").textContent = n;
+  showToast("Name updated!");
+});
+
+// ── NAV ──────────────────────────────────────────────────────
+function switchPage(name) {
+  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
+  document.querySelectorAll(".nb").forEach(function(b){ b.classList.remove("active"); });
+  document.getElementById("p-"+name).classList.add("active");
+  document.getElementById("nb-"+name).classList.add("active");
+  if (name === "hist") renderHist();
+  if (name === "dash") renderFamily();
+}
+document.getElementById("nb-dash").addEventListener("click",  function(){ switchPage("dash"); });
+document.getElementById("nb-add").addEventListener("click",   function(){ switchPage("add"); });
+document.getElementById("nb-hist").addEventListener("click",  function(){ switchPage("hist"); });
+document.getElementById("nb-setup").addEventListener("click", function(){ switchPage("setup"); });
+document.getElementById("pbtn").addEventListener("click", parseSMS);
+document.getElementById("savebtn").addEventListener("click", saveExpense);
+document.getElementById("dlbtn").addEventListener("click", downloadExcel);
+
+document.getElementById("barFilter").addEventListener("click", function(e){
+  var btn=e.target.closest(".fp"); if(!btn) return;
+  document.querySelectorAll("#barFilter .fp").forEach(function(b){b.classList.remove("active");});
+  btn.classList.add("active"); barDays=parseInt(btn.dataset.days); renderDayBars();
+});
+document.getElementById("catFilter").addEventListener("click", function(e){
+  var btn=e.target.closest(".fp"); if(!btn) return;
+  document.querySelectorAll("#catFilter .fp").forEach(function(b){b.classList.remove("active");});
+  btn.classList.add("active"); catDays=parseInt(btn.dataset.days); renderCatChart();
+});
+document.getElementById("editOverlay").addEventListener("click", function(e){ if(e.target===this) closeEdit(); });
+
+// ── TOAST ────────────────────────────────────────────────────
 var toastTimer;
 function showToast(msg) {
   var t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
+  t.textContent = msg; t.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2500);
 }
 
-init();
-
-// ── GENERATE HOME SCREEN ICON ────────────────────────────────
-// Creates a canvas-based icon so the app looks good on Home Screen
-(function() {
-  try {
-    var c = document.createElement("canvas");
-    c.width = 180; c.height = 180;
-    var ctx = c.getContext("2d");
-    // Background
-    var grad = ctx.createLinearGradient(0, 0, 180, 180);
-    grad.addColorStop(0, "#1A1A2E");
-    grad.addColorStop(1, "#2A2A4E");
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.roundRect(0, 0, 180, 180, 36);
-    ctx.fill();
-    // Rupee symbol
-    ctx.fillStyle = "#C8762B";
-    ctx.font = "bold 90px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("₹", 90, 95);
-    // Small dot accent
-    ctx.fillStyle = "#E8D5B7";
-    ctx.beginPath();
-    ctx.arc(130, 50, 10, 0, Math.PI * 2);
-    ctx.fill();
-    document.getElementById("appIcon").href = c.toDataURL("image/png");
-  } catch(e) {}
+// ── HOME SCREEN ICON ─────────────────────────────────────────
+(function(){
+  try{
+    var c=document.createElement("canvas"); c.width=180; c.height=180;
+    var ctx=c.getContext("2d");
+    var g=ctx.createLinearGradient(0,0,180,180);
+    g.addColorStop(0,"#1A1A2E"); g.addColorStop(1,"#2A2A4E");
+    ctx.fillStyle=g; ctx.beginPath(); ctx.roundRect(0,0,180,180,36); ctx.fill();
+    ctx.fillStyle="#C8762B"; ctx.font="bold 90px Arial";
+    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("₹",90,95);
+    ctx.fillStyle="#E8D5B7"; ctx.beginPath(); ctx.arc(130,50,10,0,Math.PI*2); ctx.fill();
+    document.getElementById("appIcon").href=c.toDataURL("image/png");
+  }catch(e){}
 })();
 
-// ── INSTALL BANNER (shows only in Safari, not already installed) ──
-(function() {
-  var isStandalone = window.navigator.standalone === true;
-  var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  var dismissed = localStorage.getItem("pwa_banner_dismissed");
-
-  if (!isStandalone && isIOS && isSafari && !dismissed) {
-    var banner = document.createElement("div");
-    banner.id = "installBanner";
-    banner.innerHTML =
-      '<div style="display:flex;align-items:center;gap:10px;flex:1;">' +
-        '<span style="font-size:28px;">📲</span>' +
-        '<div>' +
-          '<div style="font-weight:700;font-size:13px;color:#E8D5B7;">Add to Home Screen</div>' +
-          '<div style="font-size:11px;color:#8A7E72;margin-top:2px;">Tap <strong style="color:#C8762B;">Share</strong> → <strong style="color:#C8762B;">Add to Home Screen</strong> for the full app experience</div>' +
-        '</div>' +
-      '</div>' +
-      '<button onclick="document.getElementById(\'installBanner\').remove();localStorage.setItem(\'pwa_banner_dismissed\',\'1\')" ' +
-        'style="background:none;border:none;color:#8A7E72;font-size:20px;cursor:pointer;padding:4px;flex-shrink:0;">✕</button>';
-    banner.style.cssText = "position:fixed;bottom:calc(70px + env(safe-area-inset-bottom,16px));left:12px;right:12px;" +
-      "background:#1A1A2E;border:1px solid #C8762B;border-radius:14px;padding:12px 14px;" +
-      "display:flex;align-items:center;gap:8px;z-index:998;box-shadow:0 4px 20px rgba(0,0,0,.4);";
-    document.body.appendChild(banner);
-  }
+// ── PWA INSTALL BANNER ───────────────────────────────────────
+(function(){
+  if(window.navigator.standalone===true) return;
+  if(!/iPad|iPhone|iPod/.test(navigator.userAgent)) return;
+  if(!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) return;
+  if(localStorage.getItem("pwa_banner_dismissed")) return;
+  var banner=document.createElement("div");
+  banner.innerHTML='<div style="display:flex;align-items:center;gap:10px;flex:1;"><span style="font-size:28px;">📲</span><div><div style="font-weight:700;font-size:13px;color:#E8D5B7;">Add to Home Screen</div><div style="font-size:11px;color:#8A7E72;margin-top:2px;">Tap <strong style="color:#C8762B;">Share</strong> → <strong style="color:#C8762B;">Add to Home Screen</strong></div></div></div><button onclick="this.parentNode.remove();localStorage.setItem(\'pwa_banner_dismissed\',\'1\')" style="background:none;border:none;color:#8A7E72;font-size:20px;cursor:pointer;padding:4px;">✕</button>';
+  banner.style.cssText="position:fixed;bottom:calc(70px + env(safe-area-inset-bottom,16px));left:12px;right:12px;background:#1A1A2E;border:1px solid #C8762B;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:8px;z-index:998;box-shadow:0 4px 20px rgba(0,0,0,.4);";
+  document.body.appendChild(banner);
 })();
+
+// ── START ────────────────────────────────────────────────────
+checkOnboard();
 </script>
-
 </body>
 </html>
