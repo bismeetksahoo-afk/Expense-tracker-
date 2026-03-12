@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -13,7 +14,9 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
 <!-- Firebase SDK -->
+
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <style>
@@ -67,9 +70,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .crl span:last-child{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);}
 .bt{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
 .bf{height:100%;border-radius:99px;background:var(--burnt);}
-.dbars{display:flex;align-items:flex-end;gap:5px;height:90px;padding-top:8px;}
-.dbw{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.db{width:100%;border-radius:4px 4px 0 0;background:var(--burnt);min-height:4px;}
+.dbars{display:flex;align-items:flex-end;gap:4px;height:160px;padding-top:8px;}
+.dbw{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;height:100%;}
+.db{width:100%;border-radius:4px 4px 0 0;background:var(--burnt);min-height:4px;}.dval{font-size:9px;color:var(--burnt);font-weight:700;margin-bottom:2px;text-align:center;min-height:12px;}
 .dlbl{font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);}
 .toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,20px));left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--gold);border:1px solid var(--burnt);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .25s ease;z-index:999;white-space:nowrap;pointer-events:none;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -114,10 +117,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 @keyframes spin{to{transform:rotate(360deg);}}
 #loader p{font-size:13px;color:var(--muted);}
 </style>
+
 </head>
 <body>
 
 <!-- Onboarding — shown only on first open -->
+
 <div id="onboard">
   <div style="font-size:48px;margin-bottom:12px;">💰</div>
   <h1>XpenseTrack</h1>
@@ -128,6 +133,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <!-- Loading screen -->
+
 <div id="loader" style="display:none;">
   <div class="spin"></div>
   <p>Connecting to family sync…</p>
@@ -144,6 +150,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </header>
 
 <!-- Dashboard -->
+
 <div class="page active" id="p-dash">
   <div class="sgrid" id="sgrid"></div>
   <div class="card">
@@ -169,6 +176,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="cb" id="cchart"></div>
   </div>
   <!-- Family activity -->
+    <!-- Payment Mode Card -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="ch"><div class="ct">By Payment Mode</div><div class="ct" id="pmtotal" style="font-size:11px;color:var(--muted);font-weight:400;"></div></div>
+    <div class="cb"><div id="pmchart"></div></div>
+  </div>
+
   <div class="card">
     <div class="ch"><div class="ct">Family Activity</div><div style="font-size:10px;color:var(--muted)" id="famCount">-</div></div>
     <div class="cb" id="famList"></div>
@@ -176,6 +189,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <!-- Add -->
+
 <div class="page" id="p-add">
   <div class="smsbox">
     <div class="smslbl">Paste Bank SMS to Auto-fill</div>
@@ -214,6 +228,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <!-- History -->
+
 <div class="page" id="p-hist">
   <button class="dlbtn" id="dlbtn">⬇ Download as Excel</button>
   <div class="card">
@@ -223,9 +238,11 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <!-- Setup -->
+
 <div class="page" id="p-setup">
 
   <!-- Firebase config -->
+
   <div class="card" style="margin-bottom:14px;">
     <div class="ch"><div class="ct">🔥 Firebase Sync Config</div></div>
     <div class="cb">
@@ -237,6 +254,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   </div>
 
   <!-- Your name -->
+
   <div class="card" style="margin-bottom:14px;">
     <div class="ch"><div class="ct">👤 Your Name</div></div>
     <div class="cb">
@@ -246,6 +264,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   </div>
 
   <!-- How to setup Firebase -->
+
   <div class="card" style="margin-bottom:14px;">
     <div class="ch"><div class="ct">How to Set Up Firebase</div></div>
     <div class="cb">
@@ -259,6 +278,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   </div>
 
   <!-- Mobile usage tips -->
+
   <div class="card">
     <div class="ch"><div class="ct">Supported SMS Formats</div></div>
     <div class="cb" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:2.2;">
@@ -273,6 +293,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <!-- Edit Modal -->
+
 <div id="editOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-end;">
   <div style="background:var(--cream);border-radius:20px 20px 0 0;padding:20px 16px 40px;width:100%;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -313,6 +334,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <!-- Name edit modal -->
+
 <div id="nameOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center;">
   <div style="background:var(--cream);border-radius:16px;padding:24px 20px;width:calc(100% - 40px);max-width:320px;">
     <div style="font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:14px;">Change Name</div>
@@ -331,19 +353,18 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <div class="toast" id="toast"></div>
 
 <script>
-// ── CATEGORY DEFINITIONS ─────────────────────────────────────
+// ── CATEGORIES ───────────────────────────────────────────────
 var CATS = {
-  "Food":          {label:"Food and Dining", emoji:"🍽️", color:"#FFF3E0"},
-  "Transport":     {label:"Transport",       emoji:"🚗",  color:"#E8F5E9"},
-  "Shopping":      {label:"Shopping",        emoji:"🛍️", color:"#FCE4EC"},
-  "Grocery":       {label:"Grocery",         emoji:"🛒",  color:"#E0F7FA"},
-  "Entertainment": {label:"Entertainment",   emoji:"🎬",  color:"#EDE7F6"},
-  "Healthcare":    {label:"Healthcare",      emoji:"💊",  color:"#E3F2FD"},
-  "Utilities":     {label:"Utilities",       emoji:"💡",  color:"#F3E5F5"},
-  "Other":         {label:"Other",           emoji:"📦",  color:"#F5F5F5"}
+  "Food":          {label:"Food and Dining", emoji:"🍽️",  color:"#FFF3E0"},
+  "Transport":     {label:"Transport",       emoji:"🚗",   color:"#E8F5E9"},
+  "Shopping":      {label:"Shopping",        emoji:"🛍️",  color:"#FCE4EC"},
+  "Grocery":       {label:"Grocery",         emoji:"🛒",   color:"#E0F7FA"},
+  "Entertainment": {label:"Entertainment",   emoji:"🎬",   color:"#EDE7F6"},
+  "Healthcare":    {label:"Healthcare",      emoji:"💊",   color:"#E3F2FD"},
+  "Utilities":     {label:"Utilities",       emoji:"💡",   color:"#F3E5F5"},
+  "Other":         {label:"Other",           emoji:"📦",   color:"#F5F5F5"}
 };
 
-// Member colours (cycles through palette)
 var MEMBER_COLORS = ["#C8762B","#2E7D32","#1565C0","#6A1B9A","#AD1457","#00695C","#E65100","#4E342E"];
 function memberColor(name) {
   if (!name) return "#888";
@@ -353,14 +374,28 @@ function memberColor(name) {
 }
 
 // ── STATE ────────────────────────────────────────────────────
-var data       = [];          // live array, synced from Firestore
-var db         = null;        // Firestore instance (null until configured)
-var unsubscribe = null;       // Firestore listener cleanup fn
+var data        = [];
+var db          = null;
+var unsubscribe = null;
 var currentUser = localStorage.getItem("xpense_user") || "";
-var barDays    = 8;
-var catDays    = 8;
-var editingId  = null;
+var barDays     = 8;
+var catDays     = 8;
+var editingId   = null;
 var editingFireId = null;
+
+// ── HELPERS ──────────────────────────────────────────────────
+function fmt(n) {
+  return "Rs." + Number(n).toLocaleString("en-IN", {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+var toastTimer;
+function showToast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2500);
+}
 
 // ── ONBOARDING ───────────────────────────────────────────────
 function checkOnboard() {
@@ -373,7 +408,7 @@ function checkOnboard() {
   }
 }
 
-document.getElementById("nameBtn").addEventListener("click", function() {
+function handleNameSubmit() {
   var n = document.getElementById("nameInput").value.trim();
   if (!n) { document.getElementById("nameInput").placeholder = "Please enter your name!"; return; }
   currentUser = n;
@@ -381,50 +416,51 @@ document.getElementById("nameBtn").addEventListener("click", function() {
   document.getElementById("onboard").style.display = "none";
   document.getElementById("userLabel").textContent = n;
   bootApp();
-});
-document.getElementById("nameInput").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("nameBtn").click(); });
+}
 
 // ── BOOT ─────────────────────────────────────────────────────
 function bootApp() {
   var now = new Date();
-  document.getElementById("dtag") && (document.getElementById("dtag").textContent =
-    now.toLocaleDateString("en-IN", {day:"numeric", month:"short", year:"numeric"}));
-  document.getElementById("fDate").value = now.toISOString().slice(0, 10);
-  document.getElementById("nameChangeInput").value = currentUser;
+  var dtag = document.getElementById("dtag");
+  if (dtag) dtag.textContent = now.toLocaleDateString("en-IN", {day:"numeric", month:"short", year:"numeric"});
+  var fDate = document.getElementById("fDate");
+  if (fDate) fDate.value = now.toISOString().slice(0, 10);
+  var nci = document.getElementById("nameChangeInput");
+  if (nci) nci.value = currentUser;
 
-  // Try to init Firebase with stored config
   var storedCfg = localStorage.getItem("xpense_fb_config");
+  var fbInput = document.getElementById("fbConfigInput");
+  if (fbInput && storedCfg) fbInput.value = storedCfg;
+
   if (storedCfg) {
-    try { initFirebase(JSON.parse(storedCfg)); } catch(e) { fallbackToLocal(); }
+    try { initFirebase(JSON.parse(storedCfg)); }
+    catch(e) { fallbackToLocal(); }
   } else {
     fallbackToLocal();
   }
-  // Pre-fill firebase config textarea
-  if (storedCfg) document.getElementById("fbConfigInput").value = storedCfg;
 }
 
-// ── FIREBASE INIT ────────────────────────────────────────────
+// ── FIREBASE ─────────────────────────────────────────────────
 function initFirebase(config) {
   try {
-    // Avoid re-initialising
-    if (firebase.apps.length === 0) {
+    if (!firebase.apps || firebase.apps.length === 0) {
       firebase.initializeApp(config);
     }
     db = firebase.firestore();
     startSync();
-    document.getElementById("fbStatus").textContent = "✅ Connected to Firebase";
-    document.getElementById("fbStatus").style.color = "#2E7D32";
+    var st = document.getElementById("fbStatus");
+    if (st) { st.textContent = "Connected to Firebase"; st.style.color = "#2E7D32"; }
   } catch(err) {
-    document.getElementById("fbStatus").textContent = "❌ " + err.message;
-    document.getElementById("fbStatus").style.color = "#E53935";
+    var st = document.getElementById("fbStatus");
+    if (st) { st.textContent = "Error: " + err.message; st.style.color = "#E53935"; }
     fallbackToLocal();
   }
 }
 
 function startSync() {
-  if (unsubscribe) unsubscribe(); // clean up old listener
+  if (unsubscribe) { try { unsubscribe(); } catch(e){} }
   var loader = document.getElementById("loader");
-  loader.style.display = "flex";
+  if (loader) loader.style.display = "flex";
 
   unsubscribe = db.collection("expenses")
     .orderBy("createdAt", "desc")
@@ -433,76 +469,77 @@ function startSync() {
       snap.forEach(function(doc) {
         var d = doc.data();
         d._fireId = doc.id;
-        // Ensure numeric id for edit compatibility
         if (!d.id) d.id = doc.id;
         data.push(d);
       });
-      loader.style.display = "none";
-      document.getElementById("syncDot").classList.remove("off");
+      if (loader) loader.style.display = "none";
+      var dot = document.getElementById("syncDot");
+      if (dot) dot.classList.remove("off");
       render();
       if (document.getElementById("p-hist").classList.contains("active")) renderHist();
-      if (document.getElementById("p-dash").classList.contains("active")) renderFamily();
     }, function(err) {
-      loader.style.display = "none";
-      showToast("Sync error — check config");
+      if (loader) loader.style.display = "none";
+      showToast("Sync error — check Firebase config");
       fallbackToLocal();
     });
 }
 
 function fallbackToLocal() {
-  // Use localStorage as fallback — old data is never lost
   data = JSON.parse(localStorage.getItem("xpense_data") || "[]");
-  document.getElementById("syncDot").classList.add("off");
+  var dot = document.getElementById("syncDot");
+  if (dot) dot.classList.add("off");
   render();
   if (document.getElementById("p-hist").classList.contains("active")) renderHist();
 }
 
-// ── SAVE / EDIT / DELETE ─────────────────────────────────────
+// ── SAVE EXPENSE ─────────────────────────────────────────────
 function saveExpense() {
-  var amt = parseFloat(document.getElementById("fAmt").value);
+  var amtEl = document.getElementById("fAmt");
+  var amt = parseFloat(amtEl ? amtEl.value : "");
   if (!amt || amt <= 0) { showToast("Enter a valid amount"); return; }
-  var now = new Date();
-  var nowISO = now.toISOString();
 
+  var now = new Date();
   var entry = {
     id:        Date.now(),
     date:      document.getElementById("fDate").value,
     time:      now.toTimeString().slice(0, 5),
     cat:       document.getElementById("fCat").value,
-    desc:      document.getElementById("fDesc").value.trim(),
+    desc:      (document.getElementById("fDesc").value || "").trim(),
     amt:       amt,
     mode:      document.getElementById("fMode").value,
-    addedBy:   currentUser || "Unknown",
-    createdAt: nowISO
+    addedBy:   currentUser || "Me",
+    createdAt: now.toISOString()
   };
 
   if (db) {
-    // Use Firestore server timestamp for accurate ordering
     var fsEntry = {};
     for (var k in entry) fsEntry[k] = entry[k];
-    try { fsEntry.createdAt = firebase.firestore.FieldValue.serverTimestamp(); } catch(e2) {}
+    try { fsEntry.createdAt = firebase.firestore.FieldValue.serverTimestamp(); } catch(e) {}
     db.collection("expenses").add(fsEntry)
-      .then(function(){ showToast("Saved!"); resetAddForm(); })
-      .catch(function(err){ showToast("Error: " + err.message); });
+      .then(function() { showToast("Saved!"); resetAddForm(); })
+      .catch(function(err) { showToast("Save error: " + err.message); });
   } else {
-    // Local fallback - works fully without Firebase configured
+    // Local save — fully works without Firebase
     data.unshift(entry);
     localStorage.setItem("xpense_data", JSON.stringify(data));
     render();
-    if (document.getElementById("p-hist").classList.contains("active")) renderHist();
     showToast("Saved!");
     resetAddForm();
   }
 }
 
 function resetAddForm() {
-  document.getElementById("fAmt").value  = "";
-  document.getElementById("fDesc").value = "";
+  document.getElementById("fAmt").value   = "";
+  document.getElementById("fDesc").value  = "";
   document.getElementById("smsText").value = "";
 }
 
+// ── EDIT / DELETE ─────────────────────────────────────────────
 function openEdit(fireId) {
-  var e = data.find(function(x){ return x._fireId === fireId || String(x.id) === String(fireId); });
+  var e = null;
+  for (var i = 0; i < data.length; i++) {
+    if (data[i]._fireId === fireId || String(data[i].id) === String(fireId)) { e = data[i]; break; }
+  }
   if (!e) return;
   editingId     = e.id;
   editingFireId = e._fireId;
@@ -534,10 +571,11 @@ function saveEdit() {
   if (db && editingFireId) {
     db.collection("expenses").doc(editingFireId).update(updates)
       .then(function(){ showToast("Updated!"); closeEdit(); })
-      .catch(function(e){ showToast("Error: " + e.message); });
+      .catch(function(err){ showToast("Update error: " + err.message); });
   } else {
-    var idx = data.findIndex(function(x){ return x.id === editingId; });
-    if (idx > -1) { Object.assign(data[idx], updates); }
+    for (var i = 0; i < data.length; i++) {
+      if (data[i].id === editingId) { for (var k in updates) data[i][k] = updates[k]; break; }
+    }
     localStorage.setItem("xpense_data", JSON.stringify(data));
     render(); renderHist(); closeEdit();
     showToast("Updated!");
@@ -549,54 +587,87 @@ function deleteExpense() {
   if (db && editingFireId) {
     db.collection("expenses").doc(editingFireId).delete()
       .then(function(){ showToast("Deleted"); closeEdit(); })
-      .catch(function(e){ showToast("Error: " + e.message); });
+      .catch(function(err){ showToast("Delete error: " + err.message); });
   } else {
-    data = data.filter(function(x){ return x.id !== editingId; });
+    for (var i = 0; i < data.length; i++) {
+      if (data[i].id === editingId) { data.splice(i, 1); break; }
+    }
     localStorage.setItem("xpense_data", JSON.stringify(data));
     render(); renderHist(); closeEdit();
     showToast("Deleted");
   }
 }
 
-// ── RENDER ───────────────────────────────────────────────────
-function render() { renderStats(); renderDayBars(); renderCatChart(); renderFamily(); }
-
-function fmt(n) {
-  return "Rs." + Number(n).toLocaleString("en-IN", {minimumFractionDigits:0, maximumFractionDigits:0});
+// ── DOWNLOAD ─────────────────────────────────────────────────
+function downloadExcel() {
+  var rows = [["Date","Time","Category","Description","Amount (Rs)","Payment Mode","Added By"]];
+  var sorted = data.slice().sort(function(a,b){ return (a.date+a.time).localeCompare(b.date+b.time); });
+  sorted.forEach(function(e){
+    var c = CATS[e.cat] || CATS["Other"];
+    rows.push([e.date, e.time, c.label, e.desc||"", e.amt, e.mode, e.addedBy||""]);
+  });
+  rows.push([]); rows.push(["SUMMARY"]);
+  rows.push(["Total","","","", data.reduce(function(s,e){ return s+e.amt; },0), ""]);
+  var tots = {};
+  data.forEach(function(e){ tots[e.cat] = (tots[e.cat]||0) + e.amt; });
+  Object.keys(tots).forEach(function(k){
+    var c = CATS[k]||CATS["Other"];
+    rows.push([c.label,"","","",tots[k],""]);
+  });
+  var csv = rows.map(function(r){
+    return r.map(function(cell){
+      var s = String(cell==null?"":cell);
+      if (s.indexOf(",")!==-1||s.indexOf('"')!==-1||s.indexOf("\n")!==-1) s='"'+s.replace(/"/g,'""')+'"';
+      return s;
+    }).join(",");
+  }).join("\n");
+  var blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8;"});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement("a");
+  a.href   = url;
+  a.download = "XpenseTrack_"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("Downloaded!");
 }
 
+// ── RENDER ───────────────────────────────────────────────────
+function render() { renderStats(); renderDayBars(); renderCatChart(); renderFamily(); renderPaymentMode(); }
+
 function renderStats() {
-  var today = new Date().toISOString().slice(0, 10);
-  var texp  = data.filter(function(e){ return e.date === today; });
-  var total = 0; data.forEach(function(e){ total += e.amt; });
-  var tday  = 0; texp.forEach(function(e){ tday  += e.amt; });
-  var mkey  = today.slice(0, 7);
-  var mamt  = 0; data.filter(function(e){ return e.date && e.date.slice(0,7) === mkey; }).forEach(function(e){ mamt += e.amt; });
-  var udays = {}; data.forEach(function(e){ if(e.date) udays[e.date] = 1; });
-  var nd    = Object.keys(udays).length || 1;
+  var today = new Date().toISOString().slice(0,10);
+  var texp  = data.filter(function(e){ return e.date===today; });
+  var total = 0; data.forEach(function(e){ total += e.amt||0; });
+  var tday  = 0; texp.forEach(function(e){ tday  += e.amt||0; });
+  var mkey  = today.slice(0,7);
+  var mamt  = 0; data.filter(function(e){ return e.date&&e.date.slice(0,7)===mkey; }).forEach(function(e){ mamt+=e.amt||0; });
+  var udays = {}; data.forEach(function(e){ if(e.date) udays[e.date]=1; });
+  var nd    = Math.max(Object.keys(udays).length, 1);
   var mn    = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   var curMon = mn[new Date().getMonth()];
-  document.getElementById("sgrid").innerHTML =
-    '<div class="sc"><div class="slabel">Today</div><div class="sval">'        + fmt(tday)       + '</div><div class="ssub">' + texp.length + ' txns</div></div>' +
-    '<div class="sc"><div class="slabel">This Month</div><div class="sval">'   + fmt(mamt)       + '</div><div class="ssub">' + curMon + ' 2026</div></div>' +
-    '<div class="sc"><div class="slabel">Daily Avg</div><div class="sval">'    + fmt(total / nd) + '</div><div class="ssub">per day</div></div>' +
-    '<div class="sc"><div class="slabel">All Time</div><div class="sval">'     + fmt(total)      + '</div><div class="ssub">' + data.length + ' entries</div></div>';
+  var sgrid = document.getElementById("sgrid");
+  if (!sgrid) return;
+  sgrid.innerHTML =
+    '<div class="sc"><div class="slabel">Today</div><div class="sval">'       +fmt(tday)      +'</div><div class="ssub">'+texp.length+' txns</div></div>'+
+    '<div class="sc"><div class="slabel">This Month</div><div class="sval">'  +fmt(mamt)      +'</div><div class="ssub">'+curMon+' 2026</div></div>'+
+    '<div class="sc"><div class="slabel">Daily Avg</div><div class="sval">'   +fmt(total/nd)  +'</div><div class="ssub">per day</div></div>'+
+    '<div class="sc"><div class="slabel">All Time</div><div class="sval">'    +fmt(total)     +'</div><div class="ssub">'+data.length+' entries</div></div>';
 }
 
 function getFilteredData(days) {
   var cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - days);
-  var cutStr = cutoff.toISOString().slice(0, 10);
+  var cutStr = cutoff.toISOString().slice(0,10);
   return data.filter(function(e){ return e.date >= cutStr; });
 }
 
 function renderDayBars() {
   var filtered = getFilteredData(barDays);
   var daily = {};
-  filtered.forEach(function(e){ daily[e.date] = (daily[e.date]||0) + e.amt; });
+  filtered.forEach(function(e){ daily[e.date] = (daily[e.date]||0) + (e.amt||0); });
   var dates, labels, disp = daily;
   if (barDays === 8) {
-    dates = Object.keys(daily).sort().slice(-8);
+    dates  = Object.keys(daily).sort().slice(-8);
     labels = dates.map(function(d){ return d.slice(8); });
   } else if (barDays === 30) {
     var weeks = {};
@@ -604,135 +675,143 @@ function renderDayBars() {
       var wk = "W" + Math.ceil((new Date() - new Date(d)) / (7*864e5));
       weeks[wk] = (weeks[wk]||0) + daily[d];
     });
-    dates = Object.keys(weeks).sort().reverse(); labels = dates; disp = weeks;
+    dates  = Object.keys(weeks).sort().reverse(); labels = dates; disp = weeks;
   } else {
     var months = {};
     Object.keys(daily).sort().forEach(function(d){
       var m = d.slice(0,7); months[m] = (months[m]||0) + daily[d];
     });
-    var mn2 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    dates = Object.keys(months).sort();
-    labels = dates.map(function(m){ return mn2[parseInt(m.split("-")[1])-1]; });
-    disp = months;
+    var mnames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    dates  = Object.keys(months).sort();
+    labels = dates.map(function(m){ return mnames[parseInt(m.split("-")[1])-1]; });
+    disp   = months;
   }
-  if (!dates.length) {
-    document.getElementById("dbars").innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;">No data for this period</div>';
-    return;
-  }
-  var mx = 0; dates.forEach(function(d){ if((disp[d]||0)>mx) mx=disp[d]; }); if(!mx) mx=1;
+  var el = document.getElementById("dbars"); if (!el) return;
+  if (!dates.length) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;">No data for this period</div>'; return; }
+  var mx = 0; dates.forEach(function(d){ if ((disp[d]||0)>mx) mx=disp[d]; }); if (!mx) mx=1;
   var h = "";
   dates.forEach(function(d,i){
-    var pct = Math.max(Math.round((disp[d]||0)/mx*100),4);
-    h += '<div class="dbw"><div class="db" style="height:'+pct+'%"></div><div class="dlbl">'+labels[i]+'</div></div>';
+    var val = disp[d]||0;
+    var pct = Math.max(Math.round(val/mx*100), 4);
+    var valLabel = val >= 1000 ? Math.round(val/1000)+"k" : (val > 0 ? String(Math.round(val)) : "");
+    h += '<div class="dbw">'+
+         '<div class="dval">'+valLabel+'</div>'+
+         '<div class="db" style="height:'+pct+'%"></div>'+
+         '<div class="dlbl">'+labels[i]+'</div>'+
+         '</div>';
   });
-  document.getElementById("dbars").innerHTML = h;
+  el.innerHTML = h;
 }
 
 function renderCatChart() {
   var filtered = getFilteredData(catDays);
   var tots = {};
-  filtered.forEach(function(e){ tots[e.cat]=(tots[e.cat]||0)+e.amt; });
-  var total = 0; Object.keys(tots).forEach(function(k){ total+=tots[k]; });
-  var mx=0; Object.keys(tots).forEach(function(k){ if(tots[k]>mx) mx=tots[k]; }); if(!mx) mx=1;
+  filtered.forEach(function(e){ tots[e.cat] = (tots[e.cat]||0) + (e.amt||0); });
+  var total = 0; Object.keys(tots).forEach(function(k){ total += tots[k]; });
+  var mx = 0; Object.keys(tots).forEach(function(k){ if (tots[k]>mx) mx=tots[k]; }); if (!mx) mx=1;
   var entries = Object.keys(tots).map(function(k){ return [k,tots[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
-  if (!entries.length) {
-    document.getElementById("cchart").innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;">No data for this period</div>';
-    return;
-  }
+  var el = document.getElementById("cchart"); if (!el) return;
+  if (!entries.length) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;">No data for this period</div>'; return; }
   var h = "";
   entries.forEach(function(pair){
-    var c = CATS[pair[0]]||CATS["Other"];
+    var c   = CATS[pair[0]] || CATS["Other"];
     var pct = Math.round(pair[1]/mx*100);
-    var pcOfTotal = total > 0 ? Math.round(pair[1]/total*100)+"%" : "";
-    h += '<div class="cr"><div class="crl"><span>'+c.label+'</span>' +
-         '<span style="display:flex;gap:8px;align-items:center;">' +
-         '<span style="font-size:10px;color:var(--burnt);font-weight:700;">'+pcOfTotal+'</span>' +
-         '<span>'+fmt(pair[1])+'</span></span></div>' +
+    var pc  = total > 0 ? Math.round(pair[1]/total*100)+"%" : "";
+    h += '<div class="cr"><div class="crl"><span>'+c.label+'</span>'+
+         '<span style="display:flex;gap:8px;align-items:center;">'+
+         '<span style="font-size:10px;color:var(--burnt);font-weight:700;">'+pc+'</span>'+
+         '<span>'+fmt(pair[1])+'</span></span></div>'+
          '<div class="bt"><div class="bf" style="width:'+pct+'%"></div></div></div>';
   });
-  document.getElementById("cchart").innerHTML = h;
+  el.innerHTML = h;
 }
 
-function renderFamily() {
-  // Show last 5 expenses by any family member
-  var sorted = data.slice().sort(function(a,b){
-    var at = a.createdAt && a.createdAt.seconds ? a.createdAt.seconds : new Date(a.createdAt||0).getTime()/1000;
-    var bt = b.createdAt && b.createdAt.seconds ? b.createdAt.seconds : new Date(b.createdAt||0).getTime()/1000;
-    return bt - at;
-  }).slice(0, 8);
-  document.getElementById("famCount").textContent = data.length + " total";
+
+function renderPaymentMode() {
+  var el = document.getElementById("pmchart"); if (!el) return;
+  var pt = document.getElementById("pmtotal"); if(pt) pt.textContent = data.length ? fmt(data.reduce(function(s,e){return s+(e.amt||0);},0))+" total" : "";
+  var tots = {};
+  var total = 0;
+  data.forEach(function(e){
+    var m = e.mode || "Other";
+    tots[m] = (tots[m]||0) + (e.amt||0);
+    total += (e.amt||0);
+  });
+  var entries = Object.keys(tots).map(function(k){ return [k, tots[k]]; })
+    .sort(function(a,b){ return b[1]-a[1]; });
+  if (!entries.length) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;">No data yet</div>'; return; }
+  var pmColors = {"UPI":"#4CAF50","Cash":"#FF9800","Card":"#2196F3","Net Banking":"#9C27B0","Wallet":"#00BCD4","Other":"#9E9E9E"};
+  var mx = entries[0][1]; if (!mx) mx = 1;
   var h = "";
-  sorted.forEach(function(e){
-    var c = CATS[e.cat]||CATS["Other"];
-    var who = e.addedBy || "Unknown";
-    var col = memberColor(who);
-    h += '<div class="ei">' +
-         '<div class="ecat" style="background:'+c.color+'">'+c.emoji+'</div>' +
-         '<div class="edesc">' +
-           '<div class="et">'+(e.desc||c.label)+'</div>' +
-           '<div class="em">'+e.date+' · ' +
-             '<span class="who" style="background:'+col+'22;color:'+col+'">'+who+'</span>' +
-           '</div>' +
-         '</div>' +
-         '<div class="eamt">-'+fmt(e.amt)+'</div>' +
+  entries.forEach(function(pair){
+    var col = pmColors[pair[0]] || "#9E9E9E";
+    var pct = Math.round(pair[1]/mx*100);
+    var pc  = total > 0 ? Math.round(pair[1]/total*100)+"%" : "";
+    h += '<div class="cr">'+
+         '<div class="crl">'+
+           '<span style="display:flex;align-items:center;gap:6px;">'+
+             '<span style="width:10px;height:10px;border-radius:50%;background:'+col+';display:inline-block;flex-shrink:0;"></span>'+
+             pair[0]+
+           '</span>'+
+           '<span style="display:flex;gap:8px;align-items:center;">'+
+             '<span style="font-size:10px;color:'+col+';font-weight:700;">'+pc+'</span>'+
+             '<span>'+fmt(pair[1])+'</span>'+
+           '</span>'+
+         '</div>'+
+         '<div class="bt"><div class="bf" style="width:'+pct+'%;background:'+col+';"></div></div>'+
          '</div>';
   });
-  document.getElementById("famList").innerHTML = h || '<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">No expenses yet — add your first one!</div>';
+  el.innerHTML = h;
+}
+function renderFamily() {
+  var sorted = data.slice().sort(function(a,b){
+    var at = a.createdAt && a.createdAt.seconds ? a.createdAt.seconds*1000 : new Date(a.createdAt||0).getTime();
+    var bt = b.createdAt && b.createdAt.seconds ? b.createdAt.seconds*1000 : new Date(b.createdAt||0).getTime();
+    return bt - at;
+  }).slice(0,8);
+  var fc = document.getElementById("famCount"); if (fc) fc.textContent = data.length+" total";
+  var fl = document.getElementById("famList");  if (!fl) return;
+  var h = "";
+  sorted.forEach(function(e){
+    var c   = CATS[e.cat] || CATS["Other"];
+    var who = e.addedBy || "Unknown";
+    var col = memberColor(who);
+    h += '<div class="ei">'+
+         '<div class="ecat" style="background:'+c.color+'">'+c.emoji+'</div>'+
+         '<div class="edesc">'+
+           '<div class="et">'+(e.desc||c.label)+'</div>'+
+           '<div class="em">'+e.date+' &middot; <span class="who" style="background:'+col+'22;color:'+col+'">'+who+'</span></div>'+
+         '</div>'+
+         '<div class="eamt">-'+fmt(e.amt)+'</div>'+
+         '</div>';
+  });
+  fl.innerHTML = h || '<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">No expenses yet</div>';
 }
 
 function renderHist() {
   var sorted = data.slice().sort(function(a,b){ return (b.date+b.time).localeCompare(a.date+a.time); });
-  document.getElementById("txcount").textContent = sorted.length + " entries";
+  var tc = document.getElementById("txcount"); if (tc) tc.textContent = sorted.length+" entries";
+  var tl = document.getElementById("txlist");  if (!tl) return;
   var h = "";
   sorted.forEach(function(e){
-    var c = CATS[e.cat]||CATS["Other"];
+    var c   = CATS[e.cat] || CATS["Other"];
     var who = e.addedBy || "";
     var col = memberColor(who);
     var fid = e._fireId || String(e.id);
-    h += '<div class="ei">' +
-         '<div class="ecat" style="background:'+c.color+'">'+c.emoji+'</div>' +
-         '<div class="edesc">' +
-           '<div class="et">'+(e.desc||"—")+'</div>' +
-           '<div class="em">'+e.date+' · '+e.mode+
-             (who ? ' · <span class="who" style="background:'+col+'22;color:'+col+'">'+who+'</span>' : '')+
-           '</div>' +
-         '</div>' +
-         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">' +
-           '<div class="eamt">-'+fmt(e.amt)+'</div>' +
-           '<button class="editbtn" onclick="openEdit(\''+fid+'\')">Edit</button>' +
+    h += '<div class="ei">'+
+         '<div class="ecat" style="background:'+c.color+'">'+c.emoji+'</div>'+
+         '<div class="edesc">'+
+           '<div class="et">'+(e.desc||"—")+'</div>'+
+           '<div class="em">'+e.date+' &middot; '+e.mode+
+           (who ? ' &middot; <span class="who" style="background:'+col+'22;color:'+col+'">'+who+'</span>' : '')+
+           '</div>'+
+         '</div>'+
+         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">'+
+           '<div class="eamt">-'+fmt(e.amt)+'</div>'+
+           '<button class="editbtn" onclick="openEdit(\''+fid+'\')">Edit</button>'+
          '</div></div>';
   });
-  document.getElementById("txlist").innerHTML = h || '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No expenses yet</div>';
-}
-
-// ── DOWNLOAD EXCEL ───────────────────────────────────────────
-function downloadExcel() {
-  var rows = [["Date","Time","Category","Description","Amount (Rs)","Payment Mode","Added By"]];
-  var sorted = data.slice().sort(function(a,b){ return (a.date+a.time).localeCompare(b.date+b.time); });
-  sorted.forEach(function(e){
-    var c = CATS[e.cat]||CATS["Other"];
-    rows.push([e.date, e.time, c.label, e.desc||"", e.amt, e.mode, e.addedBy||""]);
-  });
-  rows.push([]); rows.push(["SUMMARY"]);
-  rows.push(["Total Expenses","","","",data.reduce(function(s,e){return s+e.amt;},0),""]);
-  var tots={};
-  data.forEach(function(e){ tots[e.cat]=(tots[e.cat]||0)+e.amt; });
-  Object.keys(tots).forEach(function(k){ var c=CATS[k]||CATS["Other"]; rows.push([c.label,"","","",tots[k],""]); });
-  var csv = rows.map(function(r){
-    return r.map(function(cell){
-      var s=String(cell===null||cell===undefined?"":cell);
-      if(s.indexOf(",")!==-1||s.indexOf('"')!==-1||s.indexOf("\n")!==-1) s='"'+s.replace(/"/g,'""')+'"';
-      return s;
-    }).join(",");
-  }).join("\n");
-  var blob = new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
-  var url  = URL.createObjectURL(blob);
-  var a    = document.createElement("a");
-  a.href   = url;
-  a.download = "XpenseTrack_"+new Date().toISOString().slice(0,10)+".csv";
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast("Downloaded! Open in Excel");
+  tl.innerHTML = h || '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No expenses yet</div>';
 }
 
 // ── SMS PARSER ───────────────────────────────────────────────
@@ -741,84 +820,45 @@ function parseSMS() {
   if (!text) { showToast("Paste an SMS first"); return; }
   var amt = 0;
   var amtTests = [
-    function(t){ var m=t.match(/(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{1,2})?)/i); return m?m[1]:null; },
-    function(t){ var m=t.match(/([\d,]+(?:\.\d{1,2})?)\s*(?:Rs\.?|INR|₹)/i); return m?m[1]:null; },
-    function(t){ var m=t.match(/([\d,]+\.\d{2})\s*(?:has been\s+)?(?:debited|credited)/i); return m?m[1]:null; },
-    function(t){ var m=t.match(/amount\s*:?\s*(?:Rs\.?|INR)?\s*([\d,]+(?:\.\d{1,2})?)/i); return m?m[1]:null; }
+    function(t){ var m=t.match(/(?:Rs\.?|INR|\u20b9)\s*([\d,]+(?:\.\d{1,2})?)/i); return m?m[1]:null; },
+    function(t){ var m=t.match(/([\d,]+(?:\.\d{1,2})?)\s*(?:Rs\.?|INR)/i); return m?m[1]:null; },
+    function(t){ var m=t.match(/([\d,]+\.\d{2})\s*(?:has been\s+)?(?:debited|credited)/i); return m?m[1]:null; }
   ];
-  for (var i=0;i<amtTests.length;i++){var r=amtTests[i](text);if(r){amt=parseFloat(r.replace(/,/g,""));break;}}
-  var desc="";
-  var descTests=[
-    function(t){var m=t.match(/Info:\s*(?:UPI[-\/\s])?([A-Za-z0-9 &.\-]{2,30})(?:\/|\s|$)/i);return m?m[1]:null;},
-    function(t){var m=t.match(/(?:at|to)\s+([A-Za-z][A-Za-z0-9 &\-]{2,25})(?:\s+on|\s*[,.]|\s*Ref|$)/i);return m?m[1]:null;},
-    function(t){var m=t.match(/(?:paid to|trf to)\s+([A-Za-z][A-Za-z0-9 &\-]{2,25})/i);return m?m[1]:null;},
-    function(t){var m=t.match(/VPA\s+([a-z0-9.\-@]+)/i);return m?m[1]:null;},
-    function(t){var m=t.match(/Merchant:\s*([A-Za-z0-9 &\-]{2,30})/i);return m?m[1]:null;}
+  for (var i=0;i<amtTests.length;i++){ var r=amtTests[i](text); if(r){ amt=parseFloat(r.replace(/,/g,"")); break; } }
+  var desc = "";
+  var descTests = [
+    function(t){ var m=t.match(/Info:\s*(?:UPI[-\/\s])?([A-Za-z0-9 &.\-]{2,30})(?:\/|\s|$)/i); return m?m[1]:null; },
+    function(t){ var m=t.match(/(?:at|to)\s+([A-Za-z][A-Za-z0-9 &\-]{2,25})(?:\s+on|\s*[,.]|\s*Ref|$)/i); return m?m[1]:null; },
+    function(t){ var m=t.match(/(?:paid to|trf to)\s+([A-Za-z][A-Za-z0-9 &\-]{2,25})/i); return m?m[1]:null; },
+    function(t){ var m=t.match(/VPA\s+([a-z0-9.\-@]+)/i); return m?m[1]:null; }
   ];
-  for(var j=0;j<descTests.length;j++){var r2=descTests[j](text);if(r2){desc=r2.replace(/[_@]/g," ").trim();break;}}
-  var catGuess="Other";
-  var cmap={
-    "Food":["swiggy","zomato","dominos","mcdonald","kfc","restaurant","cafe","canteen","food","pizza","burger","chai","dhaba","biryani","starbucks","dunkin","haldiram"],
+  for (var j=0;j<descTests.length;j++){ var r2=descTests[j](text); if(r2){ desc=r2.replace(/[_@]/g," ").trim(); break; } }
+  var catGuess = "Other";
+  var cmap = {
+    "Food":["swiggy","zomato","dominos","mcdonald","kfc","restaurant","cafe","food","pizza","burger","chai","biryani","starbucks"],
     "Transport":["uber","ola","rapido","metro","petrol","diesel","fuel","auto","toll","redbus","flight","indigo","irctc"],
     "Shopping":["amazon","flipkart","myntra","ajio","meesho","nykaa","croma","decathlon"],
-    "Grocery":["dmart","bigbasket","blinkit","zepto","grofers","reliance fresh","grocery","vegetables","kirana"],
-    "Entertainment":["netflix","hotstar","disney","zee5","pvr","inox","bookmyshow","spotify","gaana"],
-    "Healthcare":["pharmacy","medplus","apollo","1mg","netmeds","pharmeasy","medicine","hospital","doctor"],
-    "Utilities":["electricity","bses","tata power","adani","recharge","airtel","jio","vodafone","bsnl","broadband","igl","gas","water"]
+    "Grocery":["dmart","bigbasket","blinkit","zepto","grofers","grocery","vegetables","kirana"],
+    "Entertainment":["netflix","hotstar","disney","zee5","pvr","inox","bookmyshow","spotify"],
+    "Healthcare":["pharmacy","medplus","apollo","1mg","netmeds","medicine","hospital","doctor"],
+    "Utilities":["electricity","recharge","airtel","jio","vodafone","bsnl","broadband","gas","water"]
   };
-  var hay=(text+" "+desc).toLowerCase();
-  var ck=Object.keys(cmap);
-  outer:for(var k=0;k<ck.length;k++){for(var l=0;l<cmap[ck[k]].length;l++){if(hay.indexOf(cmap[ck[k]][l])!==-1){catGuess=ck[k];break outer;}}}
-  var pdate=new Date().toISOString().slice(0,10);
-  var mn={jan:"01",feb:"02",mar:"03",apr:"04",may:"05",jun:"06",jul:"07",aug:"08",sep:"09",oct:"10",nov:"11",dec:"12"};
-  var dm=text.match(/(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{2,4})/);
-  if(dm){var yy=dm[3].length===2?"20"+dm[3]:dm[3];pdate=yy+"-"+(mn[dm[2].toLowerCase()]||"01")+"-"+dm[1].padStart(2,"0");}
-  else{var dm2=text.match(/(\d{2})[-\/](\d{2})[-\/](\d{4})/);if(dm2)pdate=dm2[3]+"-"+dm2[2]+"-"+dm2[1];}
-  if(amt)  document.getElementById("fAmt").value=amt;
-  if(desc) document.getElementById("fDesc").value=desc;
-  document.getElementById("fCat").value=catGuess;
-  document.getElementById("fDate").value=pdate;
-  showToast(amt?("Parsed Rs."+amt+(desc?" - "+desc.slice(0,18):"")):"Amount not found - fill manually");
-}
-
-// ── NAME MANAGEMENT ──────────────────────────────────────────
-function showNameEdit() {
-  document.getElementById("nameOverlayInput").value = currentUser;
-  document.getElementById("nameOverlay").style.display = "flex";
-}
-function saveName() {
-  var n = document.getElementById("nameOverlayInput").value.trim();
-  if (!n) return;
-  currentUser = n;
-  localStorage.setItem("xpense_user", n);
-  document.getElementById("userLabel").textContent = n;
-  document.getElementById("nameChangeInput").value = n;
-  document.getElementById("nameOverlay").style.display = "none";
-  showToast("Name updated to " + n);
-}
-
-// ── FIREBASE CONFIG SAVE ─────────────────────────────────────
-document.getElementById("fbSaveBtn").addEventListener("click", function(){
-  var raw = document.getElementById("fbConfigInput").value.trim();
-  try {
-    var cfg = JSON.parse(raw);
-    if (!cfg.apiKey || !cfg.projectId) throw new Error("Missing apiKey or projectId");
-    localStorage.setItem("xpense_fb_config", JSON.stringify(cfg));
-    initFirebase(cfg);
-  } catch(e) {
-    document.getElementById("fbStatus").textContent = "❌ Invalid JSON: " + e.message;
-    document.getElementById("fbStatus").style.color = "#E53935";
+  var hay = (text+" "+desc).toLowerCase();
+  outer: for (var k=0;k<Object.keys(cmap).length;k++){
+    var key=Object.keys(cmap)[k];
+    for (var l=0;l<cmap[key].length;l++){ if(hay.indexOf(cmap[key][l])!==-1){ catGuess=key; break outer; } }
   }
-});
-
-document.getElementById("nameSaveBtn").addEventListener("click", function(){
-  var n = document.getElementById("nameChangeInput").value.trim();
-  if (!n) return;
-  currentUser = n;
-  localStorage.setItem("xpense_user", n);
-  document.getElementById("userLabel").textContent = n;
-  showToast("Name updated!");
-});
+  var pdate = new Date().toISOString().slice(0,10);
+  var mn = {jan:"01",feb:"02",mar:"03",apr:"04",may:"05",jun:"06",jul:"07",aug:"08",sep:"09",oct:"10",nov:"11",dec:"12"};
+  var dm = text.match(/(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{2,4})/);
+  if (dm) { var yy=dm[3].length===2?"20"+dm[3]:dm[3]; pdate=yy+"-"+(mn[dm[2].toLowerCase()]||"01")+"-"+dm[1].padStart(2,"0"); }
+  else { var dm2=text.match(/(\d{2})[-\/](\d{2})[-\/](\d{4})/); if(dm2) pdate=dm2[3]+"-"+dm2[2]+"-"+dm2[1]; }
+  if (amt)  document.getElementById("fAmt").value  = amt;
+  if (desc) document.getElementById("fDesc").value = desc;
+  document.getElementById("fCat").value  = catGuess;
+  document.getElementById("fDate").value = pdate;
+  showToast(amt ? "Parsed Rs."+amt+(desc?" - "+desc.slice(0,18):"") : "Amount not found - fill manually");
+}
 
 // ── NAV ──────────────────────────────────────────────────────
 function switchPage(name) {
@@ -829,64 +869,107 @@ function switchPage(name) {
   if (name === "hist") renderHist();
   if (name === "dash") renderFamily();
 }
-document.getElementById("nb-dash").addEventListener("click",  function(){ switchPage("dash"); });
-document.getElementById("nb-add").addEventListener("click",   function(){ switchPage("add"); });
-document.getElementById("nb-hist").addEventListener("click",  function(){ switchPage("hist"); });
-document.getElementById("nb-setup").addEventListener("click", function(){ switchPage("setup"); });
-document.getElementById("pbtn").addEventListener("click", parseSMS);
-document.getElementById("savebtn").addEventListener("click", saveExpense);
-document.getElementById("dlbtn").addEventListener("click", downloadExcel);
 
-document.getElementById("barFilter").addEventListener("click", function(e){
-  var btn=e.target.closest(".fp"); if(!btn) return;
-  document.querySelectorAll("#barFilter .fp").forEach(function(b){b.classList.remove("active");});
-  btn.classList.add("active"); barDays=parseInt(btn.dataset.days); renderDayBars();
-});
-document.getElementById("catFilter").addEventListener("click", function(e){
-  var btn=e.target.closest(".fp"); if(!btn) return;
-  document.querySelectorAll("#catFilter .fp").forEach(function(b){b.classList.remove("active");});
-  btn.classList.add("active"); catDays=parseInt(btn.dataset.days); renderCatChart();
-});
-document.getElementById("editOverlay").addEventListener("click", function(e){ if(e.target===this) closeEdit(); });
+function showNameEdit() {
+  document.getElementById("nameOverlayInput").value = currentUser;
+  document.getElementById("nameOverlay").style.display = "flex";
+}
 
-// ── TOAST ────────────────────────────────────────────────────
-var toastTimer;
-function showToast(msg) {
-  var t = document.getElementById("toast");
-  t.textContent = msg; t.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2500);
+function saveName() {
+  var n = document.getElementById("nameOverlayInput").value.trim();
+  if (!n) return;
+  currentUser = n;
+  localStorage.setItem("xpense_user", n);
+  document.getElementById("userLabel").textContent = n;
+  var nci = document.getElementById("nameChangeInput");
+  if (nci) nci.value = n;
+  document.getElementById("nameOverlay").style.display = "none";
+  showToast("Name updated to " + n);
 }
 
 // ── HOME SCREEN ICON ─────────────────────────────────────────
 (function(){
-  try{
+  try {
     var c=document.createElement("canvas"); c.width=180; c.height=180;
     var ctx=c.getContext("2d");
     var g=ctx.createLinearGradient(0,0,180,180);
     g.addColorStop(0,"#1A1A2E"); g.addColorStop(1,"#2A2A4E");
     ctx.fillStyle=g; ctx.beginPath(); ctx.roundRect(0,0,180,180,36); ctx.fill();
     ctx.fillStyle="#C8762B"; ctx.font="bold 90px Arial";
-    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("₹",90,95);
+    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("\u20b9",90,95);
     ctx.fillStyle="#E8D5B7"; ctx.beginPath(); ctx.arc(130,50,10,0,Math.PI*2); ctx.fill();
     document.getElementById("appIcon").href=c.toDataURL("image/png");
-  }catch(e){}
+  } catch(e){}
 })();
 
 // ── PWA INSTALL BANNER ───────────────────────────────────────
 (function(){
-  if(window.navigator.standalone===true) return;
-  if(!/iPad|iPhone|iPod/.test(navigator.userAgent)) return;
-  if(!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) return;
-  if(localStorage.getItem("pwa_banner_dismissed")) return;
-  var banner=document.createElement("div");
-  banner.innerHTML='<div style="display:flex;align-items:center;gap:10px;flex:1;"><span style="font-size:28px;">📲</span><div><div style="font-weight:700;font-size:13px;color:#E8D5B7;">Add to Home Screen</div><div style="font-size:11px;color:#8A7E72;margin-top:2px;">Tap <strong style="color:#C8762B;">Share</strong> → <strong style="color:#C8762B;">Add to Home Screen</strong></div></div></div><button onclick="this.parentNode.remove();localStorage.setItem(\'pwa_banner_dismissed\',\'1\')" style="background:none;border:none;color:#8A7E72;font-size:20px;cursor:pointer;padding:4px;">✕</button>';
-  banner.style.cssText="position:fixed;bottom:calc(70px + env(safe-area-inset-bottom,16px));left:12px;right:12px;background:#1A1A2E;border:1px solid #C8762B;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:8px;z-index:998;box-shadow:0 4px 20px rgba(0,0,0,.4);";
+  if (window.navigator.standalone===true) return;
+  if (!/iPad|iPhone|iPod/.test(navigator.userAgent)) return;
+  if (!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) return;
+  if (localStorage.getItem("pwa_banner_dismissed")) return;
+  var banner = document.createElement("div");
+  var btn = document.createElement("button");
+  btn.innerHTML = "\u2715";
+  btn.style.cssText = "background:none;border:none;color:#8A7E72;font-size:20px;cursor:pointer;padding:4px;";
+  btn.onclick = function(){ this.parentNode.remove(); localStorage.setItem("pwa_banner_dismissed","1"); };
+  var inner = document.createElement("div");
+  inner.style.cssText = "display:flex;align-items:center;gap:10px;flex:1;";
+  inner.innerHTML = '<span style="font-size:24px;">\uD83D\uDCF2</span><div><div style="font-weight:700;font-size:13px;color:#E8D5B7;">Add to Home Screen</div><div style="font-size:11px;color:#8A7E72;margin-top:2px;">Tap Share → Add to Home Screen</div></div>';
+  banner.appendChild(inner);
+  banner.appendChild(btn);
+  banner.style.cssText = "position:fixed;bottom:calc(70px + env(safe-area-inset-bottom,16px));left:12px;right:12px;background:#1A1A2E;border:1px solid #C8762B;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:8px;z-index:998;box-shadow:0 4px 20px rgba(0,0,0,.4);";
   document.body.appendChild(banner);
 })();
 
-// ── START ────────────────────────────────────────────────────
-checkOnboard();
+// ── WIRE UP ALL EVENTS (inside DOMContentLoaded = safe) ──────
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("nameBtn").addEventListener("click", handleNameSubmit);
+  document.getElementById("nameInput").addEventListener("keydown", function(e){ if(e.key==="Enter") handleNameSubmit(); });
+  document.getElementById("nb-dash").addEventListener("click",  function(){ switchPage("dash"); });
+  document.getElementById("nb-add").addEventListener("click",   function(){ switchPage("add"); });
+  document.getElementById("nb-hist").addEventListener("click",  function(){ switchPage("hist"); });
+  document.getElementById("nb-setup").addEventListener("click", function(){ switchPage("setup"); });
+  document.getElementById("pbtn").addEventListener("click", parseSMS);
+  document.getElementById("savebtn").addEventListener("click", saveExpense);
+  document.getElementById("dlbtn").addEventListener("click", downloadExcel);
+  document.getElementById("barFilter").addEventListener("click", function(e){
+    var btn = e.target.closest(".fp"); if (!btn) return;
+    document.querySelectorAll("#barFilter .fp").forEach(function(b){ b.classList.remove("active"); });
+    btn.classList.add("active"); barDays = parseInt(btn.dataset.days); renderDayBars();
+  });
+  document.getElementById("catFilter").addEventListener("click", function(e){
+    var btn = e.target.closest(".fp"); if (!btn) return;
+    document.querySelectorAll("#catFilter .fp").forEach(function(b){ b.classList.remove("active"); });
+    btn.classList.add("active"); catDays = parseInt(btn.dataset.days); renderCatChart();
+  });
+  document.getElementById("editOverlay").addEventListener("click", function(e){ if(e.target===this) closeEdit(); });
+  document.getElementById("fbSaveBtn").addEventListener("click", function(){
+    var raw = document.getElementById("fbConfigInput").value.trim();
+    try {
+      var cfg = JSON.parse(raw);
+      if (!cfg.apiKey || !cfg.projectId) throw new Error("Missing apiKey or projectId");
+      localStorage.setItem("xpense_fb_config", JSON.stringify(cfg));
+      initFirebase(cfg);
+    } catch(e) {
+      var st = document.getElementById("fbStatus");
+      st.textContent = "Invalid config: " + e.message;
+      st.style.color = "#E53935";
+    }
+  });
+  document.getElementById("nameSaveBtn").addEventListener("click", function(){
+    var n = document.getElementById("nameChangeInput").value.trim();
+    if (!n) return;
+    currentUser = n;
+    localStorage.setItem("xpense_user", n);
+    document.getElementById("userLabel").textContent = n;
+    showToast("Name updated!");
+  });
+
+  // Start the app
+  checkOnboard();
+});
 </script>
+
 </body>
 </html>
