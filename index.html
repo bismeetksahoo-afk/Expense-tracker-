@@ -303,8 +303,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
   <div class="debt-hero">
     <div class="debt-hero-label">🎯 Debt Freedom Plan</div>
-    <div class="debt-hero-val" id="debtHeroVal">Rs.6,00,000</div>
-    <div class="debt-hero-sub">Personal loan · 10.5% p.a. · 12 months · EMI Rs.52,889</div>
+    <div class="debt-hero-val" id="debtHeroVal">Rs.5,00,000</div>
+    <div class="debt-hero-sub">Personal loan · 18% p.a. · 24 months · EMI Rs.24,962</div>
     <div class="debt-overall-bar">
       <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
         <span style="font-size:10px;color:var(--muted);">Overall cleared</span>
@@ -315,8 +315,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       </div>
       <div class="debt-bar-labels">
         <span>Rs.0</span>
-        <span class="highlight" id="debtBalLabel">Balance: Rs.6,00,000</span>
-        <span>Rs.6,00,000</span>
+        <span class="highlight" id="debtBalLabel">Balance: Rs.5,00,000</span>
+        <span>Rs.5,00,000</span>
       </div>
     </div>
   </div>
@@ -508,47 +508,68 @@ function memberColor(name) {
 var DEBT_MONTHS = [
   "Apr '26","May '26","Jun '26","Jul '26",
   "Aug '26","Sep '26","Oct '26","Nov '26",
-  "Dec '26","Jan '27","Feb '27","Mar '27"
+  "Dec '26","Jan '27","Feb '27","Mar '27",
+  "Apr '27","May '27","Jun '27","Jul '27",
+  "Aug '27","Sep '27","Oct '27","Nov '27",
+  "Dec '27","Jan '28","Feb '28","Mar '28"
 ];
 var DEBT_MONTH_FULL = [
   "April 2026","May 2026","June 2026","July 2026",
   "August 2026","September 2026","October 2026","November 2026",
-  "December 2026","January 2027","February 2027","March 2027"
+  "December 2026","January 2027","February 2027","March 2027",
+  "April 2027","May 2027","June 2027","July 2027",
+  "August 2027","September 2027","October 2027","November 2027",
+  "December 2027","January 2028","February 2028","March 2028"
 ];
 var LOAN_DATA = [
-  {emi:52889,interest:5250,principal:47639,balance:552361},
-  {emi:52889,interest:4833,principal:48056,balance:504305},
-  {emi:52889,interest:4413,principal:48476,balance:455828},
-  {emi:52889,interest:3988,principal:48901,balance:406928},
-  {emi:52889,interest:3561,principal:49329,balance:357599},
-  {emi:52889,interest:3129,principal:49760,balance:307839},
-  {emi:52889,interest:2694,principal:50196,balance:257643},
-  {emi:52889,interest:2254,principal:50635,balance:207009},
-  {emi:52889,interest:1811,principal:51078,balance:155931},
-  {emi:52889,interest:1364,principal:51525,balance:104406},
-  {emi:52889,interest:914, principal:51976,balance:52430 },
-  {emi:52889,interest:459, principal:52430,balance:0     }
+  {emi:24962,interest:7500,principal:17462,balance:482538},
+  {emi:24962,interest:7238,principal:17724,balance:464814},
+  {emi:24962,interest:6972,principal:17990,balance:446824},
+  {emi:24962,interest:6702,principal:18260,balance:428564},
+  {emi:24962,interest:6428,principal:18534,balance:410031},
+  {emi:24962,interest:6150,principal:18812,balance:391219},
+  {emi:24962,interest:5868,principal:19094,balance:372126},
+  {emi:24962,interest:5582,principal:19380,balance:352745},
+  {emi:24962,interest:5291,principal:19671,balance:333074},
+  {emi:24962,interest:4996,principal:19966,balance:313109},
+  {emi:24962,interest:4697,principal:20265,balance:292843},
+  {emi:24962,interest:4393,principal:20569,balance:272274},
+  {emi:24962,interest:4084,principal:20878,balance:251396},
+  {emi:24962,interest:3771,principal:21191,balance:230205},
+  {emi:24962,interest:3453,principal:21509,balance:208696},
+  {emi:24962,interest:3130,principal:21832,balance:186864},
+  {emi:24962,interest:2803,principal:22159,balance:164705},
+  {emi:24962,interest:2471,principal:22491,balance:142213},
+  {emi:24962,interest:2133,principal:22829,balance:119385},
+  {emi:24962,interest:1791,principal:23171,balance:96213 },
+  {emi:24962,interest:1443,principal:23519,balance:72694 },
+  {emi:24962,interest:1090,principal:23872,balance:48823 },
+  {emi:24962,interest:732, principal:24230,balance:24593 },
+  {emi:24962,interest:369, principal:24593,balance:0     }
 ];
 var MONTHLY_CHECKLIST = [
-  {text:"Pay loan EMI (Rs.52,889)",         badge:"priority"},
-  {text:"Pay bike EMI (Rs.22,000)",          badge:"priority"},
-  {text:"Transfer Rs.8,000 to ring savings", badge:"saving"},
-  {text:"Transfer Rs.5,000 to emergency fund",badge:"saving"},
-  {text:"Zero new credit card spend",        badge:null},
-  {text:"Pay all fixed bills on time",       badge:null},
-  {text:"Log actual expenses this month",    badge:null}
+  {text:"Pay loan EMI (Rs.24,962)",          badge:"priority"},
+  {text:"Pay bike EMI (Rs.22,000)",           badge:"priority"},
+  {text:"Transfer Rs.8,000 to ring savings",  badge:"saving"},
+  {text:"Transfer Rs.3,000 to emergency fund",badge:"saving"},
+  {text:"Zero new credit card spend",         badge:null},
+  {text:"Pay all fixed bills on time",        badge:null},
+  {text:"Log actual expenses this month",     badge:null}
 ];
 var SPECIAL_TASKS = {
-  0: ["Apply for personal loan & consolidate Rs.5.6L","Freeze credit card — no new swipes"],
-  5: ["Midpoint check — review spending leaks 🔍","Ring fund at Rs.48,000 — on track ✓"],
-  9: ["Ring fund ~Rs.80,000 — start ring shopping 💍","Begin planning wedding details"],
-  11:["🎉 DEBT ZERO — redirect Rs.52K to savings & investments!","Start Rs.15K/month SIP investment"]
+  0:  ["Confirm loan disbursed & set up auto-debit EMI","Freeze credit card — no new swipes"],
+  5:  ["6-month check — review spending leaks 🔍","Ring fund at Rs.48,000 — on track ✓"],
+  9:  ["Ring fund ~Rs.80,000 — start ring shopping 💍","Begin planning wedding details"],
+  11: ["Year 1 done — Rs.2,27,726 cleared so far 💪","Check if part-prepayment is possible to save interest"],
+  17: ["18-month check — Rs.3,57,787 cleared 📊","Bike EMI done this month — redirect Rs.22K!"],
+  23: ["🎉 DEBT ZERO — March 2028!","Start Rs.25K/month SIP investment now"]
 };
 var MILESTONES = [
-  {month:0,  emoji:"🏦", label:"Consolidate"},
-  {month:5,  emoji:"📊", label:"Midpoint"},
+  {month:0,  emoji:"🏦", label:"Loan Start"},
   {month:9,  emoji:"💍", label:"Ring Ready"},
-  {month:11, emoji:"🎉", label:"Debt Zero"}
+  {month:11, emoji:"📅", label:"Year 1"},
+  {month:17, emoji:"🏍️", label:"Bike Done"},
+  {month:23, emoji:"🎉", label:"Debt Zero"}
 ];
 
 var debtActiveMonth = 0;
@@ -575,8 +596,8 @@ function saveDebtNotes(obj) {
 function renderDebtPage() {
   var m = debtActiveMonth;
   var ld = LOAN_DATA[m];
-  var cleared = 600000 - ld.balance;
-  var pct = Math.round((cleared / 600000) * 100);
+  var cleared = 500000 - ld.balance;
+  var pct = Math.round((cleared / 500000) * 100);
 
   // Hero
   document.getElementById("debtHeroVal").textContent = fmtRs(ld.balance) + " remaining";
@@ -791,14 +812,11 @@ function bootApp() {
     fallbackToLocal();
   }
   // Auto-set debt month based on current date
-  var monthMap = {3:0,4:1,5:2,6:3,7:4,8:5,9:6,10:7,11:8,0:9,1:10,2:11};
   var curMonth = now.getMonth(); // 0=Jan
   var curYear  = now.getFullYear();
-  // April 2026 = month index 0
-  if (curYear === 2026 && curMonth >= 3) debtActiveMonth = curMonth - 3;
-  else if (curYear === 2027 && curMonth <= 2) debtActiveMonth = curMonth + 9;
-  else debtActiveMonth = 0;
-  debtActiveMonth = Math.max(0, Math.min(11, debtActiveMonth));
+  // April 2026 = index 0, March 2028 = index 23
+  var curMonthIdx = (curYear - 2026) * 12 + (curMonth - 3);
+  debtActiveMonth = Math.max(0, Math.min(23, curMonthIdx));
   renderDebtPage();
 }
 
